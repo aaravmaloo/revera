@@ -1,11 +1,11 @@
 {
-  "name": "aevix",
+  "name": "revera",
   "version": "0.1.0",
   "description": "The credit score for npm packages. Analyze package reputation, maintenance, security, publisher trust, and ecosystem health before you install any package.",
   "type": "module",
   "main": "./dist/cli.js",
   "bin": {
-    "aevix": "./dist/cli.js"
+    "revera": "./dist/cli.js"
   },
   "files": [
     "dist",
@@ -33,11 +33,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aaravmaloo/aevix.git"
+    "url": "git+https://github.com/aaravmaloo/revera.git"
   },
-  "homepage": "https://github.com/aaravmaloo/aevix#readme",
+  "homepage": "https://github.com/aaravmaloo/revera#readme",
   "bugs": {
-    "url": "https://github.com/aaravmaloo/aevix/issues"
+    "url": "https://github.com/aaravmaloo/revera/issues"
   },
   "scripts": {
     "build": "tsc",

@@ -1,14 +1,14 @@
-# Contributing to Aevix
+# Contributing to Revera
 
-Thank you for your interest in Aevix! Contributions from the community help make this package reputation engine a standard developer tool.
+Thank you for your interest in Revera! Contributions from the community help make this package reputation engine a standard developer tool.
 
 ## Setup Instructions
 
 1. **Fork the repository** on GitHub.
 2. **Clone the repository** to your local machine:
    ```bash
-   git clone https://github.com/your-username/aevix.git
-   cd aevix
+   git clone https://github.com/your-username/revera.git
+   cd revera
    ```
 3. **Install dependencies** using npm (ensure you have Node v22+):
    ```bash
@@ -21,7 +21,7 @@ Thank you for your interest in Aevix! Contributions from the community help make
 
 ## Development and Testing
 
-Aevix is written in TypeScript and uses Vitest for testing.
+Revera is written in TypeScript and uses Vitest for testing.
 
 - **Running Tests**: Verify your changes against the test suite.
   ```bash

@@ -37,7 +37,7 @@ interface DepMeta {
 function resolveDependencyGraph(
   prodDirect: string[],
   devDirect: string[],
-  nodeModulesDir: string
+  nodeModulesDir: string,
 ): Map<string, DepMeta> {
   const graph = new Map<string, DepMeta>();
 
@@ -69,8 +69,8 @@ function resolveDependencyGraph(
         if (fs.existsSync(pkgJsonPath)) {
           const content = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf-8'));
           const childDeps = Object.keys(content.dependencies || {});
-          
-          // Avoid recursion stack overflow on cyclic dependencies by only traversing children 
+
+          // Avoid recursion stack overflow on cyclic dependencies by only traversing children
           // if we are visiting at a shallower or equal depth
           const currentMeta = graph.get(name);
           if (currentMeta && currentMeta.depth >= depth) {
@@ -140,7 +140,9 @@ function printPackageRow(res: ScanResult, config: ReturnType<typeof loadConfig>)
 
   const importance = getPackageImportance(res);
 
-  console.log(`  ${icon}  ${nameVer.padEnd(42)}  ${score}  [${importance.label.padEnd(18)}] ${chalk.dim(importance.reason)}`);
+  console.log(
+    `  ${icon}  ${nameVer.padEnd(42)}  ${score}  [${importance.label.padEnd(18)}] ${chalk.dim(importance.reason)}`,
+  );
 
   // Warnings on their own indented lines
   for (const w of res.warnings) {
@@ -149,7 +151,9 @@ function printPackageRow(res: ScanResult, config: ReturnType<typeof loadConfig>)
   }
 
   if (isFail && res.warnings.length === 0) {
-    console.log(`     ${chalk.gray('└')} ${theme.colors.danger(`Score below threshold (${res.score}/${config.minScoreThreshold})`)}`);
+    console.log(
+      `     ${chalk.gray('└')} ${theme.colors.danger(`Score below threshold (${res.score}/${config.minScoreThreshold})`)}`,
+    );
   }
 }
 
@@ -164,7 +168,7 @@ export async function handleVerify(options: VerifyOptions): Promise<void> {
   }
 
   console.log();
-  console.log(theme.colors.primary.bold('  ▲ AEVIX DEPENDENCY VERIFICATION'));
+  console.log(theme.colors.primary.bold('  ▲ REVERA DEPENDENCY VERIFICATION'));
   console.log(theme.colors.muted('  ' + '─'.repeat(50)));
 
   let prodDirect: string[] = [];
@@ -189,8 +193,8 @@ export async function handleVerify(options: VerifyOptions): Promise<void> {
 
   if (options.onlyModules) {
     depMap = new Map();
-    prodDirect.forEach(name => depMap.set(name, { isDirect: true, isProd: true, dependents: new Set(), depth: 0 }));
-    devDirect.forEach(name => depMap.set(name, { isDirect: true, isProd: false, dependents: new Set(), depth: 0 }));
+    prodDirect.forEach((name) => depMap.set(name, { isDirect: true, isProd: true, dependents: new Set(), depth: 0 }));
+    devDirect.forEach((name) => depMap.set(name, { isDirect: true, isProd: false, dependents: new Set(), depth: 0 }));
     console.log(chalk.gray(`  Scanning direct dependencies only (${directDeps.length} packages)\n`));
   } else {
     const spinner2 = ora({ text: '  Resolving dependency tree...', indent: 0 }).start();
@@ -198,7 +202,7 @@ export async function handleVerify(options: VerifyOptions): Promise<void> {
     const transCount = depMap.size - directDeps.length;
     spinner2.succeed(
       chalk.gray(`  ${depMap.size} packages resolved`) +
-      chalk.dim(`  ·  ${directDeps.length} direct  ·  ${transCount} transitive`)
+        chalk.dim(`  ·  ${directDeps.length} direct  ·  ${transCount} transitive`),
     );
     console.log();
   }
@@ -237,8 +241,8 @@ export async function handleVerify(options: VerifyOptions): Promise<void> {
           installedVersion,
           score: report.overallScore,
           recommendation: report.recommendation,
-          vulnerabilitiesCount: report.negativeSignals.filter(s => s.includes('vulnerability')).length,
-          warnings: report.warnings.filter(w => w !== 'None'),
+          vulnerabilitiesCount: report.negativeSignals.filter((s) => s.includes('vulnerability')).length,
+          warnings: report.warnings.filter((w) => w !== 'None'),
           isDirect: meta.isDirect,
           isProd: meta.isProd,
           dependents: meta.dependents,
@@ -271,14 +275,14 @@ export async function handleVerify(options: VerifyOptions): Promise<void> {
   spinner.succeed(chalk.gray(`  Scanned ${total} packages`));
   console.log();
 
-  const healthy = results.filter(r => r.score >= config.minScoreThreshold && r.warnings.length === 0);
-  const reviewed = results.filter(r => r.score >= config.minScoreThreshold && r.warnings.length > 0);
-  const failed = results.filter(r => r.score < config.minScoreThreshold);
+  const healthy = results.filter((r) => r.score >= config.minScoreThreshold && r.warnings.length === 0);
+  const reviewed = results.filter((r) => r.score >= config.minScoreThreshold && r.warnings.length > 0);
+  const failed = results.filter((r) => r.score < config.minScoreThreshold);
   const hasIssues = (r: ScanResult) => r.score < config.minScoreThreshold || r.warnings.length > 0;
 
   // Split calculations
-  const prodPkgs = results.filter(r => r.isProd);
-  const devPkgs = results.filter(r => !r.isProd);
+  const prodPkgs = results.filter((r) => r.isProd);
+  const devPkgs = results.filter((r) => !r.isProd);
 
   const calcWeightedScore = (pkgs: ScanResult[]) => {
     let sum = 0;
@@ -300,7 +304,7 @@ export async function handleVerify(options: VerifyOptions): Promise<void> {
   const devScoreColor = theme.getScoreColor(devScore);
 
   // ── Direct Dependencies ────────────────────────────────────────────────────
-  const directResults = results.filter(r => r.isDirect);
+  const directResults = results.filter((r) => r.isDirect);
   if (directResults.length > 0) {
     console.log(`  ${chalk.white.bold('Direct Dependencies')}  ${chalk.dim(`${directResults.length} packages`)}`);
     console.log();
@@ -311,17 +315,19 @@ export async function handleVerify(options: VerifyOptions): Promise<void> {
   }
 
   // ── Transitive Dependencies ────────────────────────────────────────────────
-  const transitiveResults = results.filter(r => !r.isDirect);
+  const transitiveResults = results.filter((r) => !r.isDirect);
   if (transitiveResults.length > 0) {
-    const transitiveHealthy = transitiveResults.filter(r => !hasIssues(r));
-    const transitiveIssues = transitiveResults.filter(r => hasIssues(r));
+    const transitiveHealthy = transitiveResults.filter((r) => !hasIssues(r));
+    const transitiveIssues = transitiveResults.filter((r) => hasIssues(r));
 
-    console.log(`  ${chalk.white.bold('Transitive Dependencies')}  ${chalk.dim(`${transitiveResults.length} packages`)}`);
+    console.log(
+      `  ${chalk.white.bold('Transitive Dependencies')}  ${chalk.dim(`${transitiveResults.length} packages`)}`,
+    );
     console.log();
 
     if (transitiveHealthy.length > 0) {
       console.log(
-        `  ${theme.colors.success(theme.icons.success)}  ${chalk.gray(`${transitiveHealthy.length} packages healthy`)}`
+        `  ${theme.colors.success(theme.icons.success)}  ${chalk.gray(`${transitiveHealthy.length} packages healthy`)}`,
       );
     }
 
@@ -334,7 +340,14 @@ export async function handleVerify(options: VerifyOptions): Promise<void> {
   // ── Largest Deductions Analysis ────────────────────────────────────────────
   const deductions: { reason: string; penalty: number }[] = [];
 
-  const trustCount = results.filter(r => r.warnings.some(w => w.toLowerCase().includes('trust') || w.toLowerCase().includes('compromise') || w.toLowerCase().includes('protestware'))).length;
+  const trustCount = results.filter((r) =>
+    r.warnings.some(
+      (w) =>
+        w.toLowerCase().includes('trust') ||
+        w.toLowerCase().includes('compromise') ||
+        w.toLowerCase().includes('protestware'),
+    ),
+  ).length;
   if (trustCount > 0) {
     deductions.push({
       reason: `${trustCount} package${trustCount > 1 ? 's' : ''} with historical trust/security incidents`,
@@ -342,7 +355,9 @@ export async function handleVerify(options: VerifyOptions): Promise<void> {
     });
   }
 
-  const staleCount = results.filter(r => r.warnings.some(w => w.toLowerCase().includes('last release') || w.toLowerCase().includes('updated in over'))).length;
+  const staleCount = results.filter((r) =>
+    r.warnings.some((w) => w.toLowerCase().includes('last release') || w.toLowerCase().includes('updated in over')),
+  ).length;
   if (staleCount > 0) {
     deductions.push({
       reason: `${staleCount} package${staleCount > 1 ? 's' : ''} lacking recent releases`,
@@ -350,7 +365,9 @@ export async function handleVerify(options: VerifyOptions): Promise<void> {
     });
   }
 
-  const pre1Count = results.filter(r => r.warnings.some(w => w.toLowerCase().includes('semver major') || w.toLowerCase().includes('pre-1.0'))).length;
+  const pre1Count = results.filter((r) =>
+    r.warnings.some((w) => w.toLowerCase().includes('semver major') || w.toLowerCase().includes('pre-1.0')),
+  ).length;
   if (pre1Count > 0) {
     deductions.push({
       reason: `${pre1Count} package${pre1Count > 1 ? 's' : ''} below major version 1.0`,
@@ -358,7 +375,7 @@ export async function handleVerify(options: VerifyOptions): Promise<void> {
     });
   }
 
-  const activeVulnCount = results.filter(r => r.vulnerabilitiesCount > 0).length;
+  const activeVulnCount = results.filter((r) => r.vulnerabilitiesCount > 0).length;
   if (activeVulnCount > 0) {
     deductions.push({
       reason: `${activeVulnCount} package${activeVulnCount > 1 ? 's' : ''} with active vulnerabilities`,
@@ -388,9 +405,13 @@ export async function handleVerify(options: VerifyOptions): Promise<void> {
   console.log('  ' + chalk.white.bold('Project Health'));
   console.log('  ' + chalk.dim('─'.repeat(45)));
   console.log(`  Overall Health     ${projectScoreColor(`${projectScore}/100`)}`);
-  console.log(`  Production Deps    ${chalk.white(prodPkgs.length.toString().padEnd(4))}  Score: ${prodScoreColor(`${prodScore}/100`)}`);
+  console.log(
+    `  Production Deps    ${chalk.white(prodPkgs.length.toString().padEnd(4))}  Score: ${prodScoreColor(`${prodScore}/100`)}`,
+  );
   if (!options.prodOnly) {
-    console.log(`  Development Deps   ${chalk.white(devPkgs.length.toString().padEnd(4))}  Score: ${devScoreColor(`${devScore}/100`)}`);
+    console.log(
+      `  Development Deps   ${chalk.white(devPkgs.length.toString().padEnd(4))}  Score: ${devScoreColor(`${devScore}/100`)}`,
+    );
   }
   console.log();
 
@@ -406,22 +427,24 @@ export async function handleVerify(options: VerifyOptions): Promise<void> {
   // Risk Distribution Block
   console.log(`  ${chalk.white.bold('Risk Distribution')}`);
   console.log(`    [${riskBar}]`);
-  console.log(`    ${chalk.white(total)} packages  ·  ${theme.colors.success(healthyCount)} healthy  ·  ${theme.colors.warning(reviewCount)} review  ·  ${theme.colors.danger(riskCount)} risk`);
+  console.log(
+    `    ${chalk.white(total)} packages  ·  ${theme.colors.success(healthyCount)} healthy  ·  ${theme.colors.warning(reviewCount)} review  ·  ${theme.colors.danger(riskCount)} risk`,
+  );
   console.log();
 
   // Verdict
   if (failed.length > 0) {
     console.log(
-      theme.colors.danger(`  ${theme.icons.failure}  ${failed.length} package${failed.length > 1 ? 's' : ''} failed reputation checks. Review before deploying.`)
+      theme.colors.danger(
+        `  ${theme.icons.failure}  ${failed.length} package${failed.length > 1 ? 's' : ''} failed reputation checks. Review before deploying.`,
+      ),
     );
   } else if (reviewed.length > 0) {
     console.log(
-      theme.colors.warning(`  ${theme.icons.warning}  All packages passed. ${reviewed.length} raised minor warnings.`)
+      theme.colors.warning(`  ${theme.icons.warning}  All packages passed. ${reviewed.length} raised minor warnings.`),
     );
   } else {
-    console.log(
-      theme.colors.success(`  ${theme.icons.success}  All ${total} dependencies look healthy.`)
-    );
+    console.log(theme.colors.success(`  ${theme.icons.success}  All ${total} dependencies look healthy.`));
   }
   console.log();
 }

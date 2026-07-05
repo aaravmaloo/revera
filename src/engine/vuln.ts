@@ -15,7 +15,7 @@ export interface Vulnerability {
 export async function checkVulnerabilities(
   packageName: string,
   version: string,
-  offline = false
+  offline = false,
 ): Promise<Vulnerability[]> {
   const config = loadConfig();
   const cacheKey = `vulns_${version}`;
@@ -46,9 +46,9 @@ export async function checkVulnerabilities(
         timeout: 8000,
         headers: {
           'Content-Type': 'application/json',
-          'User-Agent': 'aevix-cli/1.0.0',
+          'User-Agent': 'revera-cli/1.0.0',
         },
-      }
+      },
     );
 
     const vulns: Vulnerability[] = response.data?.vulns || [];

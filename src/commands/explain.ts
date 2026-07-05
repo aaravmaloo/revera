@@ -16,7 +16,7 @@ export async function handleExplain(packageName: string, options: { offline?: bo
   const recStyle = theme.getRecommendationStyle(report.recommendation);
 
   console.log();
-  console.log(theme.colors.primary.bold('  ▲ AEVIX EXPLAIN'));
+  console.log(theme.colors.primary.bold('  ▲ REVERA EXPLAIN'));
   console.log(theme.colors.muted('  ' + '─'.repeat(50)));
   console.log(`  Package:   ${chalk.white.bold(report.packageName)}@${report.version}`);
   console.log(`  Overall:   ${scoreColor(`${report.overallScore}/100`)}  ${recStyle(report.recommendation)}`);

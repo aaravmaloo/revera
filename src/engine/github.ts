@@ -29,7 +29,7 @@ export async function fetchGitHubRepoData(
   owner: string,
   repo: string,
   packageName: string,
-  offline = false
+  offline = false,
 ): Promise<GitHubRepoData | null> {
   const config = loadConfig();
   const cacheKey = `github_${owner}_${repo}`;
@@ -45,7 +45,7 @@ export async function fetchGitHubRepoData(
 
   const headers: Record<string, string> = {
     Accept: 'application/vnd.github.v3+json',
-    'User-Agent': 'aevix-cli/1.0.0',
+    'User-Agent': 'revera-cli/1.0.0',
   };
 
   const keyringToken = await retrieveToken();
@@ -130,7 +130,7 @@ export async function fetchGitHubReadme(
   owner: string,
   repo: string,
   packageName: string,
-  offline = false
+  offline = false,
 ): Promise<string | null> {
   const config = loadConfig();
   const cacheKey = `github_readme_${owner}_${repo}`;
@@ -146,7 +146,7 @@ export async function fetchGitHubReadme(
 
   const headers: Record<string, string> = {
     Accept: 'application/vnd.github.v3+json',
-    'User-Agent': 'aevix-cli/1.0.0',
+    'User-Agent': 'revera-cli/1.0.0',
   };
 
   const keyringToken = await retrieveToken();

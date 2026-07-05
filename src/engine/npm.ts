@@ -85,7 +85,7 @@ export async function fetchRegistryData(packageName: string, offline = false): P
       timeout: 10000,
       headers: {
         Accept: 'application/json',
-        'User-Agent': 'aevix-cli/1.0.0',
+        'User-Agent': 'revera-cli/1.0.0',
       },
     });
 
@@ -119,7 +119,7 @@ export async function fetchDownloadStats(packageName: string, offline = false): 
     const response = await axios.get<NpmDownloadsData>(url, {
       timeout: 10000,
       headers: {
-        'User-Agent': 'aevix-cli/1.0.0',
+        'User-Agent': 'revera-cli/1.0.0',
       },
     });
 
@@ -135,9 +135,7 @@ export async function fetchDownloadStats(packageName: string, offline = false): 
 export async function hasDefinitelyTyped(packageName: string, offline = false): Promise<boolean> {
   if (offline) return false;
   // Scoped packages like @babel/core have types at @types/babel__core
-  const typesName = packageName.startsWith('@')
-    ? packageName.slice(1).replace(/\//g, '__')
-    : packageName;
+  const typesName = packageName.startsWith('@') ? packageName.slice(1).replace(/\//g, '__') : packageName;
   const url = `https://registry.npmjs.org/@types%2F${encodeURIComponent(typesName)}`;
   try {
     const res = await axios.head(url, { timeout: 3000 });

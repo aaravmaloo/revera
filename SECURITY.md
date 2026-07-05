@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-We actively support and patch the latest major version of Aevix.
+We actively support and patch the latest major version of Revera.
 
 | Version | Supported          |
 | ------- | ------------------ |
@@ -11,7 +11,7 @@ We actively support and patch the latest major version of Aevix.
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability within Aevix, please do **NOT** open a public issue. Instead, report it privately to our security team.
+If you discover a security vulnerability within Revera, please do **NOT** open a public issue. Instead, report it privately to our security team.
 
 Please email your report to **aaravmaloo06@gmail.com** with:
 - A descriptive title

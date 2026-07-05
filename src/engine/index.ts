@@ -9,7 +9,7 @@ import * as logger from '../utils/logger.js';
 
 export async function analyzePackage(
   packageName: string,
-  options: { offline?: boolean; silent?: boolean } = {}
+  options: { offline?: boolean; silent?: boolean } = {},
 ): Promise<ReputationReport> {
   const offline = !!options.offline;
   const silent = !!options.silent;
@@ -76,7 +76,15 @@ export async function analyzePackage(
 
     // Step 6: Score package and compile report
     if (spinner) spinner.text = 'Computing package confidence report...';
-    const report = generateReport(registryData, downloadStats, githubData, vulnerabilities, trustResult, typosquatResult, externalTypes);
+    const report = generateReport(
+      registryData,
+      downloadStats,
+      githubData,
+      vulnerabilities,
+      trustResult,
+      typosquatResult,
+      externalTypes,
+    );
 
     if (spinner) {
       spinner.succeed(`Successfully analyzed "${packageName}"`);

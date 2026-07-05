@@ -37,7 +37,7 @@ export function generateReport(
   vulns: Vulnerability[],
   trustResult: TrustResult,
   typosquatResult: TyposquatResult,
-  hasExternalTypes = false
+  hasExternalTypes = false,
 ): ReputationReport {
   const latestVersion = npmData['dist-tags']?.latest || Object.keys(npmData.versions).pop() || '1.0.0';
   const manifest = npmData.versions[latestVersion] || {};
@@ -72,9 +72,7 @@ export function generateReport(
         'First-class TypeScript support',
       ],
       negativeSignals: hasVulns ? [`${vulns.length} active vulnerability advisories`] : [],
-      warnings: hasVulns
-        ? [`Vulnerabilities detected: ${vulns.map(v => v.id).join(', ')}`]
-        : ['None'],
+      warnings: hasVulns ? [`Vulnerabilities detected: ${vulns.map((v) => v.id).join(', ')}`] : ['None'],
       summary: `${npmData.name} is a DefinitelyTyped declaration package. It provides TypeScript types and is generally safe to install alongside the corresponding runtime library.`,
       trustIncident: null,
       typosquatWarning: null,
@@ -122,7 +120,9 @@ export function generateReport(
       maintenance += 0;
       const monthsAgo = Math.round(daysSinceRelease / 30);
       negativeSignals.push(`Last release was ${monthsAgo} months ago`);
-      warnings.push(`Last release: ${monthsAgo} months ago. No recent updates detected. This may be normal for mature, stable libraries.`);
+      warnings.push(
+        `Last release: ${monthsAgo} months ago. No recent updates detected. This may be normal for mature, stable libraries.`,
+      );
     }
   } else {
     maintenance += 15;
@@ -145,7 +145,7 @@ export function generateReport(
     }
   } else {
     // Fallback: NPM release frequency (count versions in last 180 days)
-    const releaseCount180Days = Object.values(timeEntries).filter(timeStr => {
+    const releaseCount180Days = Object.values(timeEntries).filter((timeStr) => {
       const pTime = new Date(timeStr);
       return now.getTime() - pTime.getTime() < 180 * 24 * 60 * 60 * 1000;
     }).length;
@@ -227,15 +227,17 @@ export function generateReport(
     // Soft deduction only — many respected packages stay on 0.x intentionally
     stability += 10;
     if (weeklyDownloads < 100_000) {
-      warnings.push('SemVer major version is below 1.0. API stability may vary depending on the project\'s release practices.');
+      warnings.push(
+        "SemVer major version is below 1.0. API stability may vary depending on the project's release practices.",
+      );
     } else {
       negativeSignals.push('SemVer major version is below 1.0 (pre-release)');
     }
   }
 
   // Breaking release frequency (Max 40)
-  const allVersions = Object.keys(npmData.versions).filter(v => semver.valid(v));
-  const majorVersions = new Set(allVersions.map(v => semver.major(v)));
+  const allVersions = Object.keys(npmData.versions).filter((v) => semver.valid(v));
+  const majorVersions = new Set(allVersions.map((v) => semver.major(v)));
   const creationTimeStr = timeEntries.created;
   const yearsActive = creationTimeStr
     ? (now.getTime() - new Date(creationTimeStr).getTime()) / (1000 * 60 * 60 * 24 * 365)
@@ -268,7 +270,7 @@ export function generateReport(
     const vulnDed = Math.min(50, vulns.length * 20);
     security += 50 - vulnDed;
     negativeSignals.push(`${vulns.length} active vulnerability advisories`);
-    warnings.push(`Vulnerabilities detected: ${vulns.map(v => v.id).join(', ')}`);
+    warnings.push(`Vulnerabilities detected: ${vulns.map((v) => v.id).join(', ')}`);
   }
 
   // Install scripts (Max 30)
@@ -582,7 +584,7 @@ export function generateReport(
   // Ecosystem: 13%, Docs: 9%, DX: 5%, PublisherTrust: 15%
   const weightMaint = 0.13;
   const weightStab = 0.12;
-  const weightSec = 0.20;
+  const weightSec = 0.2;
   const weightQual = 0.13;
   const weightEco = 0.13;
   const weightDocs = 0.09;
@@ -597,7 +599,7 @@ export function generateReport(
       ecosystem * weightEco +
       documentation * weightDocs +
       developerExperience * weightDx +
-      publisherTrust * weightTrust
+      publisherTrust * weightTrust,
   );
 
   // Penalize overall score dramatically if critical security vulnerabilities or archived
@@ -616,13 +618,13 @@ export function generateReport(
       recommendation = overallScore >= 70 ? 'Use With Caution' : 'Not Recommended';
     } else {
       // High/moderate incident softens the label one notch
-      if (overallScore >= 90)      recommendation = 'Recommended with Reservations';
+      if (overallScore >= 90) recommendation = 'Recommended with Reservations';
       else if (overallScore >= 75) recommendation = 'Use With Caution';
       else if (overallScore >= 50) recommendation = 'Caution';
-      else                          recommendation = 'Not Recommended';
+      else recommendation = 'Not Recommended';
     }
   } else {
-    if (overallScore >= 90)      recommendation = 'Highly Recommended';
+    if (overallScore >= 90) recommendation = 'Highly Recommended';
     else if (overallScore >= 75) recommendation = 'Recommended';
     else if (overallScore >= 50) recommendation = 'Caution';
   }
@@ -638,8 +640,8 @@ export function generateReport(
       overallScore >= 80
         ? `${nameCapitalized} is technically mature and has no known active vulnerabilities.`
         : overallScore >= 60
-        ? `${nameCapitalized} is a functional package with some maintenance concerns.`
-        : `${nameCapitalized} has notable technical shortcomings in addition to its trust history.`;
+          ? `${nameCapitalized} is a functional package with some maintenance concerns.`
+          : `${nameCapitalized} has notable technical shortcomings in addition to its trust history.`;
 
     const trustConcern =
       inc.severity === 'critical'
@@ -648,13 +650,13 @@ export function generateReport(
 
     summary = `${technical} ${trustConcern}`;
   } else if (overallScore >= 90) {
-    summary = `${nameCapitalized} is one of the highest-confidence packages available on npm. It is active, stable, and secure. Aevix recommends installing it.`;
+    summary = `${nameCapitalized} is one of the highest-confidence packages available on npm. It is active, stable, and secure. Revera recommends installing it.`;
   } else if (overallScore >= 75) {
-    summary = `${nameCapitalized} is a reliable and well-maintained package. Aevix recommends installing it for general use.`;
+    summary = `${nameCapitalized} is a reliable and well-maintained package. Revera recommends installing it for general use.`;
   } else if (overallScore >= 50) {
     summary = `${nameCapitalized} has a moderate confidence rating. Review warning signs before using it in critical production projects.`;
   } else {
-    summary = `${nameCapitalized} has low confidence. Aevix recommends looking for alternatives due to security, activity, or stability concerns.`;
+    summary = `${nameCapitalized} has low confidence. Revera recommends looking for alternatives due to security, activity, or stability concerns.`;
   }
 
   // De-duplicate signals

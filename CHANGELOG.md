@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2026-07-05
 
 ### Added
-- Initial release of **Aevix CLI** package reputation engine.
+- Initial release of **Revera CLI** package reputation engine.
 - Complete reputation scoring engine evaluating 7 categories: Maintenance, Stability, Security, Package Quality, Ecosystem, Documentation, and Developer Experience.
 - Core commands: positional package analysis, `install`, `config`, `doctor`, `cache`, and `update`.
 - Native type definitions and ES modules (ESM) support.

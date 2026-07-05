@@ -32,8 +32,8 @@ function getVersion(): string {
 const program = new Command();
 
 program
-  .name('aevix')
-  .description('Aevix — Open-source package reputation engine')
+  .name('revera')
+  .description('Revera, A Open-source package reputation engine')
   .version(getVersion())
   .option('-o, --offline', 'Run using cached data only (no network requests)')
   .argument('[packageName]', 'Package name to check reputation for')
@@ -45,7 +45,7 @@ program
     await handleAnalyze(packageName, { offline: options.offline });
   });
 
-// ── aevix check <package> ─────────────────────────────────────────────────
+// ── revera check <package> ─────────────────────────────────────────────────
 // Check a package's reputation before installing it.
 program
   .command('check <packageName>')
@@ -55,7 +55,7 @@ program
     await handleAnalyze(packageName, { offline: options.offline });
   });
 
-// ── aevix why <package> ───────────────────────────────────────────────────
+// ── revera why <package> ───────────────────────────────────────────────────
 // Explain exactly why a package scored what it did, category by category.
 program
   .command('why <packageName>')
@@ -65,7 +65,7 @@ program
     await handleExplain(packageName, { offline: options.offline });
   });
 
-// ── aevix add <package> ───────────────────────────────────────────────────
+// ── revera add <package> ───────────────────────────────────────────────────
 // Screen a package's reputation and install it if it passes.
 program
   .command('add <packageName>')
@@ -76,7 +76,7 @@ program
     await handleInstall(packageName, options, process.argv);
   });
 
-// ── aevix audit ───────────────────────────────────────────────────────────
+// ── revera audit ───────────────────────────────────────────────────────────
 // Audit all dependencies in the current project, including transitive ones.
 program
   .command('audit')
@@ -93,7 +93,7 @@ program
     });
   });
 
-// ── aevix login ───────────────────────────────────────────────────────────
+// ── revera login ───────────────────────────────────────────────────────────
 program
   .command('login [provider]')
   .description('Authenticate with GitHub using OAuth2 or Personal Access Token')
@@ -101,10 +101,8 @@ program
     await handleLogin();
   });
 
-// ── aevix config ──────────────────────────────────────────────────────────
-const configCmd = program
-  .command('config')
-  .description('View and update Aevix settings');
+// ── revera config ──────────────────────────────────────────────────────────
+const configCmd = program.command('config').description('View and update Revera settings');
 
 configCmd
   .command('set <key> <value>')
@@ -124,7 +122,7 @@ configCmd.action(() => {
   handleConfigList();
 });
 
-// ── aevix doctor ──────────────────────────────────────────────────────────
+// ── revera doctor ──────────────────────────────────────────────────────────
 program
   .command('doctor')
   .description('Run connectivity and environment health checks')
@@ -132,10 +130,8 @@ program
     await handleDoctor();
   });
 
-// ── aevix cache ───────────────────────────────────────────────────────────
-const cacheCmd = program
-  .command('cache')
-  .description('Manage the offline response cache');
+// ── revera cache ───────────────────────────────────────────────────────────
+const cacheCmd = program.command('cache').description('Manage the offline response cache');
 
 cacheCmd
   .command('clear')
@@ -148,10 +144,10 @@ cacheCmd.action(() => {
   handleCacheStatus();
 });
 
-// ── aevix update ──────────────────────────────────────────────────────────
+// ── revera update ──────────────────────────────────────────────────────────
 program
   .command('update')
-  .description('Check if a newer version of Aevix is available on npm')
+  .description('Check if a newer version of Revera is available on npm')
   .action(async () => {
     await handleUpdate();
   });

@@ -6,13 +6,13 @@ import { execa } from 'execa';
 import { storeToken } from '../utils/keyring.js';
 import { theme } from '../ui/theme.js';
 
-// Pre-registered public OAuth Client ID for Aevix CLI
+// Pre-registered public OAuth Client ID for Revera CLI
 const CLIENT_ID = '178c6fc778ccc68e1d6a';
 
 async function promptUser(question: string): Promise<string> {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-  return new Promise(resolve => {
-    rl.question(question, answer => {
+  return new Promise((resolve) => {
+    rl.question(question, (answer) => {
       rl.close();
       resolve(answer.trim());
     });
@@ -36,7 +36,7 @@ async function openBrowser(url: string) {
 
 export async function handleLogin(): Promise<void> {
   console.log();
-  console.log(theme.colors.primary.bold('  ▲ AEVIX GITHUB AUTHENTICATION'));
+  console.log(theme.colors.primary.bold('  ▲ REVERA GITHUB AUTHENTICATION'));
   console.log(theme.colors.muted('  ' + '─'.repeat(45)));
   console.log('  Authenticate with GitHub to increase API rate limits.');
   console.log();
@@ -62,15 +62,17 @@ export async function handleLogin(): Promise<void> {
         headers: {
           Authorization: `token ${token}`,
           Accept: 'application/vnd.github.v3+json',
-          'User-Agent': 'aevix-cli/1.0.0'
-        }
+          'User-Agent': 'revera-cli/1.0.0',
+        },
       });
       spinner.succeed(`  Authenticated as ${chalk.green(res.data.login)}`);
-      
+
       const storeSpinner = ora({ text: '  Storing token...', indent: 0 }).start();
       await storeToken(token);
-      storeSpinner.succeed(`  Token saved to ${chalk.dim('~/.aevix/.token')}  (same security model as git credentials)`);
-      console.log(chalk.gray('\n  Aevix will now authenticate GitHub API requests at 5,000 req/hour.'));
+      storeSpinner.succeed(
+        `  Token saved to ${chalk.dim('~/.revera/.token')}  (same security model as git credentials)`,
+      );
+      console.log(chalk.gray('\n  Revera will now authenticate GitHub API requests at 5,000 req/hour.'));
     } catch (err: any) {
       spinner.fail(`  Authentication failed: ${err.response?.data?.message || err.message}`);
     }
@@ -82,11 +84,11 @@ export async function handleLogin(): Promise<void> {
         'https://github.com/login/device/code',
         {
           client_id: CLIENT_ID,
-          scope: 'public_repo read:user'
+          scope: 'public_repo read:user',
         },
         {
-          headers: { Accept: 'application/json' }
-        }
+          headers: { Accept: 'application/json' },
+        },
       );
 
       const { device_code, user_code, verification_uri, interval, expires_in } = res.data;
@@ -95,26 +97,26 @@ export async function handleLogin(): Promise<void> {
       console.log(`  1. Please visit: ${chalk.cyan(verification_uri)}`);
       console.log(`  2. Enter code:   ${chalk.white.bold(user_code)}`);
       console.log();
-      
+
       await openBrowser(verification_uri);
 
       const pollSpinner = ora({ text: '  Waiting for GitHub authorization...', indent: 0 }).start();
       const startTime = Date.now();
       const pollInterval = (interval || 5) * 1000;
-      
+
       const checkAuth = async (): Promise<string | null> => {
         const pollRes = await axios.post(
           'https://github.com/login/oauth/access_token',
           {
             client_id: CLIENT_ID,
             device_code,
-            grant_type: 'urn:ietf:params:oauth:grant-type:device_code'
+            grant_type: 'urn:ietf:params:oauth:grant-type:device_code',
           },
           {
-            headers: { Accept: 'application/json' }
-          }
+            headers: { Accept: 'application/json' },
+          },
         );
-        
+
         if (pollRes.data.access_token) {
           return pollRes.data.access_token;
         }
@@ -122,7 +124,7 @@ export async function handleLogin(): Promise<void> {
           return null;
         }
         if (pollRes.data.error === 'expired_token') {
-          throw new Error('Authorization code expired. Please run "aevix login" again.');
+          throw new Error('Authorization code expired. Please run "revera login" again.');
         }
         if (pollRes.data.error) {
           throw new Error(pollRes.data.error_description || pollRes.data.error);
@@ -135,9 +137,9 @@ export async function handleLogin(): Promise<void> {
           pollSpinner.fail('  Authentication timed out.');
           return;
         }
-        
-        await new Promise(resolve => setTimeout(resolve, pollInterval));
-        
+
+        await new Promise((resolve) => setTimeout(resolve, pollInterval));
+
         try {
           const token = await checkAuth();
           if (token) {
@@ -150,17 +152,21 @@ export async function handleLogin(): Promise<void> {
                 headers: {
                   Authorization: `token ${token}`,
                   Accept: 'application/vnd.github.v3+json',
-                  'User-Agent': 'aevix-cli/1.0.0'
-                }
+                  'User-Agent': 'revera-cli/1.0.0',
+                },
               });
               username = userRes.data.login;
-            } catch { /* ignore */ }
+            } catch {
+              /* ignore */
+            }
 
             console.log(`  ${theme.colors.success(theme.icons.success)}  Authenticated as ${chalk.green(username)}`);
             const storeSpinner = ora({ text: '  Storing token...', indent: 0 }).start();
             await storeToken(token);
-            storeSpinner.succeed(`  Token saved to ${chalk.dim('~/.aevix/.token')}  (same security model as git credentials)`);
-            console.log(chalk.gray('\n  Aevix will now authenticate GitHub API requests at 5,000 req/hour.'));
+            storeSpinner.succeed(
+              `  Token saved to ${chalk.dim('~/.revera/.token')}  (same security model as git credentials)`,
+            );
+            console.log(chalk.gray('\n  Revera will now authenticate GitHub API requests at 5,000 req/hour.'));
             break;
           }
         } catch (err: any) {

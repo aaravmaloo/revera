@@ -32,7 +32,7 @@ jobs:
       run: pnpm install --ignore-scripts
 
     - name: Run Format Check
-      run: pnpm exec prettier --check "src/**/*.ts" "tests/**/*.ts"
+      run: pnpm exec prettier --check --write "src/**/*.ts" "tests/**/*.ts"
 
     - name: Run Build
       run: pnpm run build

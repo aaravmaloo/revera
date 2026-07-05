@@ -2,12 +2,17 @@ import fs from 'node:fs';
 import path from 'node:path';
 import axios from 'axios';
 import chalk from 'chalk';
-import { loadConfig, getAevixDir } from '../utils/config.js';
+import { loadConfig, getReveraDir } from '../utils/config.js';
 import { getCacheInfo } from '../utils/cache.js';
 import { theme } from '../ui/theme.js';
 import { retrieveToken } from '../utils/keyring.js';
 
-async function testConnection(url: string, method: 'GET' | 'POST' = 'GET', data?: any, headers?: any): Promise<number | null> {
+async function testConnection(
+  url: string,
+  method: 'GET' | 'POST' = 'GET',
+  data?: any,
+  headers?: any,
+): Promise<number | null> {
   const start = Date.now();
   try {
     if (method === 'POST') {
@@ -22,7 +27,7 @@ async function testConnection(url: string, method: 'GET' | 'POST' = 'GET', data?
 }
 
 export async function handleDoctor(): Promise<void> {
-  console.log(theme.colors.primary.bold('\nAEVIX DIAGNOSTICS & SYSTEM DOCTOR'));
+  console.log(theme.colors.primary.bold('\nREVERA DIAGNOSTICS & SYSTEM DOCTOR'));
   console.log(chalk.gray('Running health checks and diagnosing API connectivity...\n'));
 
   // 1. Check Node.js version
@@ -35,21 +40,21 @@ export async function handleDoctor(): Promise<void> {
   console.log(`${chalk.white.bold('Node.js Environment:')}  ${nodeStatus}`);
 
   // 2. Configuration & Folders
-  const aevixDir = getAevixDir();
-  const configPath = path.join(aevixDir, 'config.json');
-  const cachePath = path.join(aevixDir, 'cache');
-  const logsPath = path.join(aevixDir, 'logs');
+  const reveraDir = getReveraDir();
+  const configPath = path.join(reveraDir, 'config.json');
+  const cachePath = path.join(reveraDir, 'cache');
+  const logsPath = path.join(reveraDir, 'logs');
 
   let folderPerms = true;
   try {
-    fs.accessSync(aevixDir, fs.constants.R_OK | fs.constants.W_OK);
+    fs.accessSync(reveraDir, fs.constants.R_OK | fs.constants.W_OK);
   } catch (err) {
     folderPerms = false;
   }
 
   const folderStatus = folderPerms
-    ? chalk.green(`${theme.icons.success} Writable (~/.aevix)`)
-    : chalk.red(`${theme.icons.failure} Permissions error: (~/.aevix) not writable`);
+    ? chalk.green(`${theme.icons.success} Writable (~/.revera)`)
+    : chalk.red(`${theme.icons.failure} Permissions error: (~/.revera) not writable`);
   console.log(`${chalk.white.bold('Storage Permissions:')} ${folderStatus}`);
 
   // 3. API Connectivity
@@ -70,7 +75,7 @@ export async function handleDoctor(): Promise<void> {
     'https://api.osv.dev/v1/query',
     'POST',
     { package: { name: 'express', ecosystem: 'npm' } },
-    { 'Content-Type': 'application/json' }
+    { 'Content-Type': 'application/json' },
   );
   if (osvLatency !== null) {
     console.log(chalk.green(`Connected (${osvLatency}ms)`));
@@ -85,9 +90,15 @@ export async function handleDoctor(): Promise<void> {
   // Token priority: OS keyring > config file > environment variable
   const keyringToken = await retrieveToken();
   const token = keyringToken || config.githubToken || process.env.GITHUB_TOKEN;
-  const tokenSource = keyringToken ? 'Login (keyring)' : config.githubToken ? 'Config file' : token ? 'Env variable' : null;
+  const tokenSource = keyringToken
+    ? 'Login (keyring)'
+    : config.githubToken
+      ? 'Config file'
+      : token
+        ? 'Env variable'
+        : null;
 
-  const headers: any = { 'User-Agent': 'aevix-cli/1.0.0' };
+  const headers: any = { 'User-Agent': 'revera-cli/1.0.0' };
   if (token) {
     headers['Authorization'] = `token ${token}`;
   }
@@ -102,11 +113,12 @@ export async function handleDoctor(): Promise<void> {
 
     const authLabel = tokenSource
       ? chalk.green(`Authenticated via ${tokenSource}`)
-      : chalk.yellow('Anonymous (run aevix login to get 5,000 req/hour)');
+      : chalk.yellow('Anonymous (run revera login to get 5,000 req/hour)');
     console.log(
-      chalk.green(`Connected (${latency}ms)`) + ` | ${authLabel} | ` +
-      chalk.white(`Rate Limit: ${remaining}/${limit}`) +
-      chalk.dim(` (Resets ${resetTime})`)
+      chalk.green(`Connected (${latency}ms)`) +
+        ` | ${authLabel} | ` +
+        chalk.white(`Rate Limit: ${remaining}/${limit}`) +
+        chalk.dim(` (Resets ${resetTime})`),
     );
   } catch (err: any) {
     console.log(chalk.red(`Failed to connect (${err.message})`));
@@ -126,14 +138,14 @@ export async function handleDoctor(): Promise<void> {
   if (hasIssues) {
     console.log(
       chalk.bold.red(
-        `${theme.icons.failure}  Doctor found issue(s) that may degrade your performance. Check network, file permissions, or firewall settings.`
-      )
+        `${theme.icons.failure}  Doctor found issue(s) that may degrade your performance. Check network, file permissions, or firewall settings.`,
+      ),
     );
   } else {
     console.log(
       chalk.bold.green(
-        `${theme.icons.success}  All systems nominal! Aevix has solid API connections and storage settings.`
-      )
+        `${theme.icons.success}  All systems nominal! Revera has solid API connections and storage settings.`,
+      ),
     );
   }
   console.log();

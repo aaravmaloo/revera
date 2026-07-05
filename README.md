@@ -1,31 +1,31 @@
-# Aevix
+# Revera
 
-[![npm version](https://img.shields.io/npm/v/aevix.svg?style=flat-square&color=blue)](https://www.npmjs.com/package/aevix)
-[![build status](https://img.shields.io/github/actions/workflow/status/aaravmaloo/aevix/ci.yml?branch=main&style=flat-square)](https://github.com/aaravmaloo/aevix/actions)
+[![npm version](https://img.shields.io/npm/v/revera.svg?style=flat-square&color=blue)](https://www.npmjs.com/package/revera)
+[![build status](https://img.shields.io/github/actions/workflow/status/aaravmaloo/revera/ci.yml?branch=main&style=flat-square)](https://github.com/aaravmaloo/revera/actions)
 [![node version](https://img.shields.io/badge/node-%3E%3D22.0.0-brightgreen?style=flat-square)](https://nodejs.org/)
 [![typescript](https://img.shields.io/badge/TypeScript-5.x-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
-[![license](https://img.shields.io/npm/l/aevix.svg?style=flat-square&color=yellow)](LICENSE)
-[![coverage](https://img.shields.io/badge/coverage-100%25-brightgreen?style=flat-square)](https://github.com/aaravmaloo/aevix)
+[![license](https://img.shields.io/npm/l/revera.svg?style=flat-square&color=yellow)](LICENSE)
+[![coverage](https://img.shields.io/badge/coverage-100%25-brightgreen?style=flat-square)](https://github.com/aaravmaloo/revera)
 
 > The credit score for npm packages.
 
-Aevix helps you decide whether a package is worth installing before you run `npm install`. It analyzes package quality, maintenance, security, ecosystem health, and publisher trust, then produces an explainable reputation report.
+revera helps you decide whether a package is worth installing before you run `npm install`. It analyzes package quality, maintenance, security, ecosystem health, and publisher trust, then produces an explainable reputation report.
 
 ---
 
 ## Demo
 
-![Aevix CLI Demo](assets/demo.gif)
-*Watch Aevix check and explain packages in real time.*
+![revera CLI Demo](assets/demo.gif)
+*Watch revera check and explain packages in real time.*
 
 ---
 
 ## Quick Start
 
-Run Aevix instantly without installation:
+Run revera instantly without installation:
 
 ```bash
-npx aevix check react
+npx revera check react
 ```
 
 ---
@@ -35,11 +35,11 @@ npx aevix check react
 Checking a package like `request` (which was deprecated in 2020) immediately warns you with specific reasons:
 
 ```bash
-$ aevix why request
+$ revera why request
 ```
 
 ```text
-  ▲ AEVIX EXPLAIN
+  ▲ revera EXPLAIN
   ──────────────────────────────────────────────────
   Package:   request@2.88.2
   Overall:   38/100  Not Recommended
@@ -91,7 +91,7 @@ $ aevix why request
     !  Package has been officially marked as deprecated by the maintainer.
 
   Verdict
-    Request has low confidence. Aevix recommends looking for alternatives due to security, activity, or stability concerns.
+    Request has low confidence. revera recommends looking for alternatives due to security, activity, or stability concerns.
 ```
 
 ---
@@ -101,7 +101,7 @@ $ aevix why request
 Install globally to access the executable from any directory:
 
 ```bash
-npm install -g aevix
+npm install -g revera
 ```
 
 ---
@@ -111,84 +111,84 @@ npm install -g aevix
 ### 1. Check Package Reputation
 Analyze a package and get a high-level summary report:
 ```bash
-aevix check lodash
+revera check lodash
 ```
 
 Run in offline mode using cached files:
 ```bash
-aevix check express --offline
+revera check express --offline
 ```
 
 ### 2. Explain Package Rating
 Get a deep-dive breakdown of the score, positive signals, and deductions:
 ```bash
-aevix why node-ipc
+revera why node-ipc
 ```
 
 ### 3. Screen and Add Dependency
 Screens packages before installation and warns when reputation falls below your configured threshold:
 ```bash
-aevix add express
+revera add express
 ```
 You can pass flags directly to your package manager:
 ```bash
-aevix add typescript --save-dev
+revera add typescript --save-dev
 ```
 
 ### 4. Audit Local Workspace
 Audit all packages in the current project (includes transitive dependencies) and calculate an overall project health score:
 ```bash
-aevix audit
+revera audit
 ```
 
 Audit production dependencies only:
 ```bash
-aevix audit --prod
+revera audit --prod
 ```
 
 Audit direct dependencies only, skipping transitive dependencies:
 ```bash
-aevix audit --direct
+revera audit --direct
 ```
 
 ### 5. GitHub Authentication
-Authenticate with GitHub to increase API rate limits (60/hour anonymous vs 5,000/hour authenticated). You can choose between browser-based OAuth2 or manually entering a Personal Access Token. Once authorized, Aevix securely encrypts and stores the token in your OS keyring (Windows DPAPI, macOS Keychain, or Linux Secret Service):
+Authenticate with GitHub to increase API rate limits (60/hour anonymous vs 5,000/hour authenticated). You can choose between browser-based OAuth2 or manually entering a Personal Access Token. Once authorized, revera securely encrypts and stores the token in your OS keyring (Windows DPAPI, macOS Keychain, or Linux Secret Service):
 ```bash
-aevix login
+revera login
 ```
 
 ### 6. CLI Settings
-Manage local settings saved in `~/.aevix/config.json`:
+Manage local settings saved in `~/.revera/config.json`:
 ```bash
-aevix config
-aevix config set minScoreThreshold 75
-aevix config get minScoreThreshold
+revera config
+revera config set minScoreThreshold 75
+revera config get minScoreThreshold
 ```
 
 ### 7. System Doctor
 Verify environment settings, API status, and network connection latencies:
 ```bash
-aevix doctor
+revera doctor
 ```
 
 ### 8. Cache Control
 Inspect or clear local metadata cache:
 ```bash
-aevix cache
-aevix cache clear
+revera cache
+revera cache clear
 ```
 
 ### 9. Update Check
-Verify if you are running the latest version of the Aevix engine:
+Verify if you are running the latest version of the revera engine:
 ```bash
-aevix update
+revera update
 ```
 
 ---
 
 ## Comparison
 
-| Feature | `npm audit` | `osv-scanner` | Socket | **Aevix** |
+| Feature | `revera audit` | `osv-scanner` | Socket | **revera** |
 | :--- | :---: | :---: | :---: | :---: |
 | **CVE Vulnerabilities** | ✔ | ✔ | ✔ | ✔ |
 | **Ecosystem Reputation** | ✖ | ✖ | Partial | ✔ |
@@ -200,7 +200,7 @@ aevix update
 
 ## Scoring Model & Philosophy
 
-A package's reputation is not determined by popularity alone. Aevix combines maintenance, stability, security, ecosystem maturity, documentation quality, developer experience, and publisher trust into a weighted, explainable score. Every deduction shown in the CLI corresponds to specific evidence.
+A package's reputation is not determined by popularity alone. revera combines maintenance, stability, security, ecosystem maturity, documentation quality, developer experience, and publisher trust into a weighted, explainable score. Every deduction shown in the CLI corresponds to specific evidence.
 
 ### Category Weights
 
@@ -237,14 +237,14 @@ A package's reputation is not determined by popularity alone. Aevix combines mai
 #### How do I avoid GitHub API rate limits?
 Without a token, anonymous queries are rate-limited to 60 requests per hour. You can set a Personal Access Token in your configuration:
 ```bash
-aevix config set githubToken ghp_YOUR_TOKEN
+revera config set githubToken ghp_YOUR_TOKEN
 ```
 
 #### What happens if I am offline?
-Aevix will fall back to using cache files. You can explicitly run commands in offline mode with the `--offline` flag.
+revera will fall back to using cache files. You can explicitly run commands in offline mode with the `--offline` flag.
 
 #### Does the add command modify my project?
-Aevix acts as a shell wrapper. It runs the real package installer after screening.
+revera acts as a shell wrapper. It runs the real package installer after screening.
 
 ---
 
@@ -271,10 +271,10 @@ Please review the [Contributing Guide](CONTRIBUTING.md) to get started with setu
 
 ## Disclaimer
 
-Aevix provides a reputation score based on observable project signals and historical data. It is intended to assist engineering decisions and should not be treated as a definitive security audit.
+revera provides a reputation score based on observable project signals and historical data. It is intended to assist engineering decisions and should not be treated as a definitive security audit.
 
 ---
 
 ## License
 
-Aevix is distributed under the [MIT License](LICENSE).
+revera is distributed under the [MIT License](LICENSE).

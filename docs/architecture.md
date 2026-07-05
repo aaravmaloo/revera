@@ -1,6 +1,6 @@
-# Aevix Technical Architecture
+# Revera Technical Architecture
 
-Aevix is designed as a standalone CLI reputation tool. This document details the flow of data and the engine configuration.
+Revera is designed as a standalone CLI reputation tool. This document details the flow of data and the engine configuration.
 
 ## System Flow
 
@@ -32,6 +32,6 @@ Built using Commander.js, the CLI routes user arguments. It maps commands and se
 * **OSV Vuln DB**: Checks version-specific vulnerability listings using post-queries.
 
 ### 3. File Helpers (`src/utils/`)
-* **caching**: File-based system. Stores response profiles inside `~/.aevix/cache/`.
-* **configuration**: Manages tokens, package manager choices, and threshold levels inside `~/.aevix/config.json`.
+* **caching**: File-based system. Stores response profiles inside `~/.revera/cache/`.
+* **configuration**: Manages tokens, package manager choices, and threshold levels inside `~/.revera/config.json`.
 * **pm**: Automatically detects lockfiles (`pnpm-lock.yaml`, `package-lock.json`, etc.) to run matching installation processes.

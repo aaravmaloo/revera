@@ -51,7 +51,11 @@ export function detectPackageManager(cwd: string = process.cwd()): PackageManage
   return 'npm';
 }
 
-export function getInstallCommand(pm: PackageManager, packageName: string, isDev = false): { cmd: string; args: string[] } {
+export function getInstallCommand(
+  pm: PackageManager,
+  packageName: string,
+  isDev = false,
+): { cmd: string; args: string[] } {
   const devFlag = isDev ? (pm === 'yarn' ? '--dev' : '-D') : '';
   const args: string[] = [];
 

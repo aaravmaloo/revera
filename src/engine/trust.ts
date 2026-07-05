@@ -98,7 +98,7 @@ const TRUST_BLOCKLIST: Record<string, TrustIncident> = {
       'A malicious version (3.7.2) was published after the maintainer account was compromised. The code harvested npm credentials and sent them to a remote server.',
     penalty: 20,
   },
-  'crossenv': {
+  crossenv: {
     severity: 'critical',
     year: 2017,
     summary: 'Typosquat — malicious impersonation of cross-env (2017)',

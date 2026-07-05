@@ -17,7 +17,7 @@ export function printReport(report: ReputationReport): void {
 
   // 1. Header
   console.log();
-  console.log(theme.colors.primary.bold('  ▲ AEVIX PACKAGE REPORT'));
+  console.log(theme.colors.primary.bold('  ▲ REVERA PACKAGE REPORT'));
   console.log(theme.colors.muted('  ' + '─'.repeat(45)));
   console.log(`  Package:        ${chalk.white.bold(report.packageName)}@${report.version}`);
   console.log(`  Confidence:     ${scoreColor(`${report.overallScore} / 100`)} (${recStyle(report.recommendation)})`);
@@ -26,7 +26,9 @@ export function printReport(report: ReputationReport): void {
   // 2. Trust incident inline alert (high severity, not critical — critical shown in analyze.ts)
   if (report.trustIncident && report.trustIncident.severity === 'high') {
     console.log();
-    console.log(`  ${chalk.bold.yellow('⚠  Publisher Trust Incident')}  ${chalk.dim(`(${report.trustIncident.year})`)}`);
+    console.log(
+      `  ${chalk.bold.yellow('⚠  Publisher Trust Incident')}  ${chalk.dim(`(${report.trustIncident.year})`)}`,
+    );
     console.log(`  ${chalk.yellow(report.trustIncident.summary)}`);
     console.log(`  ${chalk.dim(report.trustIncident.detail)}`);
   }
@@ -35,14 +37,14 @@ export function printReport(report: ReputationReport): void {
   console.log(`\n  ${chalk.white.bold('Category Scores')}`);
 
   const categories: { key: keyof typeof report.categoryScores; label: string }[] = [
-    { key: 'maintenance',        label: 'Maintenance' },
-    { key: 'stability',          label: 'Stability' },
-    { key: 'security',           label: 'Security' },
-    { key: 'quality',            label: 'Package Quality' },
-    { key: 'ecosystem',          label: 'Ecosystem' },
-    { key: 'documentation',      label: 'Documentation' },
+    { key: 'maintenance', label: 'Maintenance' },
+    { key: 'stability', label: 'Stability' },
+    { key: 'security', label: 'Security' },
+    { key: 'quality', label: 'Package Quality' },
+    { key: 'ecosystem', label: 'Ecosystem' },
+    { key: 'documentation', label: 'Documentation' },
     { key: 'developerExperience', label: 'Developer Experience' },
-    { key: 'publisherTrust',     label: 'Publisher Trust' },
+    { key: 'publisherTrust', label: 'Publisher Trust' },
   ];
 
   for (const cat of categories) {
@@ -75,7 +77,7 @@ export function printReport(report: ReputationReport): void {
 
   // 6. Warnings
   console.log(`\n  ${theme.colors.warning.bold('Warnings')}`);
-  const realWarnings = report.warnings.filter(w => w !== 'None');
+  const realWarnings = report.warnings.filter((w) => w !== 'None');
   if (realWarnings.length === 0) {
     console.log(`    ${chalk.gray('None')}`);
   } else {

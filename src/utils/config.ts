@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 
-export interface AevixConfig {
+export interface ReveraConfig {
   githubToken?: string;
   cacheTtlMs: number;
   installSuggest: boolean;
@@ -11,7 +11,7 @@ export interface AevixConfig {
   packageManager: 'npm' | 'pnpm' | 'yarn' | 'bun' | 'auto';
 }
 
-const DEFAULT_CONFIG: AevixConfig = {
+const DEFAULT_CONFIG: ReveraConfig = {
   cacheTtlMs: 24 * 60 * 60 * 1000, // 24 hours
   installSuggest: false,
   minScoreThreshold: 70,
@@ -19,18 +19,18 @@ const DEFAULT_CONFIG: AevixConfig = {
   packageManager: 'auto',
 };
 
-const CONFIG_DIR = path.join(os.homedir(), '.aevix');
+const CONFIG_DIR = path.join(os.homedir(), '.revera');
 const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json');
 
-export function getAevixDir(): string {
+export function getReveraDir(): string {
   if (!fs.existsSync(CONFIG_DIR)) {
     fs.mkdirSync(CONFIG_DIR, { recursive: true });
   }
   return CONFIG_DIR;
 }
 
-export function loadConfig(): AevixConfig {
-  const dir = getAevixDir();
+export function loadConfig(): ReveraConfig {
+  const dir = getReveraDir();
   if (!fs.existsSync(CONFIG_FILE)) {
     saveConfig(DEFAULT_CONFIG);
     return DEFAULT_CONFIG;
@@ -46,8 +46,8 @@ export function loadConfig(): AevixConfig {
   }
 }
 
-export function saveConfig(config: Partial<AevixConfig>): AevixConfig {
-  const dir = getAevixDir();
+export function saveConfig(config: Partial<ReveraConfig>): ReveraConfig {
+  const dir = getReveraDir();
   const current = fs.existsSync(CONFIG_FILE) ? loadConfig() : DEFAULT_CONFIG;
   const updated = { ...current, ...config };
   fs.writeFileSync(CONFIG_FILE, JSON.stringify(updated, null, 2), 'utf-8');

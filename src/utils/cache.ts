@@ -1,9 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { getAevixDir } from './config.js';
+import { getReveraDir } from './config.js';
 import * as logger from './logger.js';
 
-const CACHE_DIR = path.join(getAevixDir(), 'cache');
+const CACHE_DIR = path.join(getReveraDir(), 'cache');
 
 function getCacheDir(): string {
   if (!fs.existsSync(CACHE_DIR)) {

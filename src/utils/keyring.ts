@@ -2,10 +2,10 @@ import { execa } from 'execa';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { getAevixDir } from './config.js';
+import { getReveraDir } from './config.js';
 import * as logger from './logger.js';
 
-const SERVICE_NAME = 'aevix_github_token';
+const SERVICE_NAME = 'revera_github_token';
 const ACCOUNT_NAME = 'github';
 
 // ── Windows ─────────────────────────────────────────────────────────────────
@@ -15,11 +15,7 @@ const ACCOUNT_NAME = 'github';
 
 async function storeWindows(token: string): Promise<void> {
   // cmdkey /generic:<target> /user:<user> /pass:<password>
-  await execa('cmdkey', [
-    `/generic:${SERVICE_NAME}`,
-    `/user:${ACCOUNT_NAME}`,
-    `/pass:${token}`,
-  ]);
+  await execa('cmdkey', [`/generic:${SERVICE_NAME}`, `/user:${ACCOUNT_NAME}`, `/pass:${token}`]);
 }
 
 async function retrieveWindows(): Promise<string | null> {
@@ -48,7 +44,7 @@ public static extern void CredFree(IntPtr cred);
   `;
 
   // Simpler: just read from the fallback file since cmdkey can't echo passwords
-  const securePath = path.join(getAevixDir(), '.token');
+  const securePath = path.join(getReveraDir(), '.token');
   if (fs.existsSync(securePath)) {
     return fs.readFileSync(securePath, 'utf-8').trim();
   }
@@ -61,30 +57,19 @@ async function deleteWindows(): Promise<void> {
   } catch {
     // ignore if not found
   }
-  const securePath = path.join(getAevixDir(), '.token');
+  const securePath = path.join(getReveraDir(), '.token');
   if (fs.existsSync(securePath)) fs.unlinkSync(securePath);
 }
 
 // ── macOS ────────────────────────────────────────────────────────────────────
 
 async function storeMac(token: string): Promise<void> {
-  await execa('security', [
-    'add-generic-password',
-    '-a', ACCOUNT_NAME,
-    '-s', SERVICE_NAME,
-    '-w', token,
-    '-U',
-  ]);
+  await execa('security', ['add-generic-password', '-a', ACCOUNT_NAME, '-s', SERVICE_NAME, '-w', token, '-U']);
 }
 
 async function retrieveMac(): Promise<string | null> {
   try {
-    const { stdout } = await execa('security', [
-      'find-generic-password',
-      '-a', ACCOUNT_NAME,
-      '-s', SERVICE_NAME,
-      '-w',
-    ]);
+    const { stdout } = await execa('security', ['find-generic-password', '-a', ACCOUNT_NAME, '-s', SERVICE_NAME, '-w']);
     return stdout.trim();
   } catch {
     return null;
@@ -93,11 +78,7 @@ async function retrieveMac(): Promise<string | null> {
 
 async function deleteMac(): Promise<void> {
   try {
-    await execa('security', [
-      'delete-generic-password',
-      '-a', ACCOUNT_NAME,
-      '-s', SERVICE_NAME,
-    ]);
+    await execa('security', ['delete-generic-password', '-a', ACCOUNT_NAME, '-s', SERVICE_NAME]);
   } catch {
     // ignore
   }
@@ -107,11 +88,11 @@ async function deleteMac(): Promise<void> {
 
 async function storeLinux(token: string): Promise<void> {
   try {
-    await execa('secret-tool', [
-      'store', '--label=Aevix GitHub Token',
-      'service', SERVICE_NAME,
-      'username', ACCOUNT_NAME,
-    ], { input: token });
+    await execa(
+      'secret-tool',
+      ['store', '--label=Revera GitHub Token', 'service', SERVICE_NAME, 'username', ACCOUNT_NAME],
+      { input: token },
+    );
     return;
   } catch {
     // fall through to file
@@ -121,9 +102,7 @@ async function storeLinux(token: string): Promise<void> {
 
 async function retrieveLinux(): Promise<string | null> {
   try {
-    const { stdout } = await execa('secret-tool', [
-      'lookup', 'service', SERVICE_NAME, 'username', ACCOUNT_NAME,
-    ]);
+    const { stdout } = await execa('secret-tool', ['lookup', 'service', SERVICE_NAME, 'username', ACCOUNT_NAME]);
     if (stdout.trim()) return stdout.trim();
   } catch {
     // fall through
@@ -141,22 +120,22 @@ async function deleteLinux(): Promise<void> {
 }
 
 // ── File fallback (Windows primary retrieval path too) ───────────────────────
-// Stored in ~/.aevix/.token — same security model as ~/.netrc, git credentials,
+// Stored in ~/.revera/.token — same security model as ~/.netrc, git credentials,
 // npm auth tokens, and gh CLI tokens on Linux.
 
 function storeFile(token: string): void {
-  const securePath = path.join(getAevixDir(), '.token');
+  const securePath = path.join(getReveraDir(), '.token');
   fs.writeFileSync(securePath, token, { encoding: 'utf-8', mode: 0o600 });
 }
 
 function retrieveFile(): string | null {
-  const securePath = path.join(getAevixDir(), '.token');
+  const securePath = path.join(getReveraDir(), '.token');
   if (!fs.existsSync(securePath)) return null;
   return fs.readFileSync(securePath, 'utf-8').trim();
 }
 
 function deleteFile(): void {
-  const securePath = path.join(getAevixDir(), '.token');
+  const securePath = path.join(getReveraDir(), '.token');
   if (fs.existsSync(securePath)) fs.unlinkSync(securePath);
 }
 

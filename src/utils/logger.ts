@@ -1,18 +1,18 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { getAevixDir } from './config.js';
+import { getReveraDir } from './config.js';
 
 let logStream: fs.WriteStream | null = null;
 
 function getLogStream(): fs.WriteStream {
   if (logStream) return logStream;
 
-  const logsDir = path.join(getAevixDir(), 'logs');
+  const logsDir = path.join(getReveraDir(), 'logs');
   if (!fs.existsSync(logsDir)) {
     fs.mkdirSync(logsDir, { recursive: true });
   }
 
-  const logFile = path.join(logsDir, 'aevix.log');
+  const logFile = path.join(logsDir, 'revera.log');
   logStream = fs.createWriteStream(logFile, { flags: 'a', encoding: 'utf-8' });
   return logStream;
 }

@@ -6,7 +6,7 @@ import { Vulnerability } from '../src/engine/vuln.js';
 import { checkPublisherTrust } from '../src/engine/trust.js';
 import { checkTyposquatting } from '../src/engine/typosquat.js';
 
-describe('Aevix Scoring Engine', () => {
+describe('Revera Scoring Engine', () => {
   const mockNpmData: NpmRegistryData = {
     name: 'test-package',
     'dist-tags': { latest: '1.2.0' },
@@ -27,7 +27,8 @@ describe('Aevix Scoring Engine', () => {
     },
     repository: { type: 'git', url: 'git+https://github.com/test-org/test-package.git' },
     maintainers: [{ name: 'dev1' }, { name: 'dev2' }, { name: 'dev3' }],
-    readme: '# Test Package\nThis is a great package. Examples:\n```js\nconst x = require("test");\n```\n## API Reference\nOptions and methods description here.',
+    readme:
+      '# Test Package\nThis is a great package. Examples:\n```js\nconst x = require("test");\n```\n## API Reference\nOptions and methods description here.',
   };
 
   const mockDownloads: NpmDownloadsData = {

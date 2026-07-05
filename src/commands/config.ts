@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { loadConfig, saveConfig, AevixConfig } from '../utils/config.js';
+import { loadConfig, saveConfig, ReveraConfig } from '../utils/config.js';
 import { theme } from '../ui/theme.js';
 
 export function handleConfigGet(key: string): void {
@@ -8,7 +8,7 @@ export function handleConfigGet(key: string): void {
     console.error(chalk.red(`Error: Invalid configuration key "${key}".`));
     process.exit(1);
   }
-  const val = config[key as keyof AevixConfig];
+  const val = config[key as keyof ReveraConfig];
   console.log(val !== undefined ? val : '');
 }
 
@@ -19,7 +19,7 @@ export function handleConfigSet(key: string, value: string): void {
     process.exit(1);
   }
 
-  const updated: Partial<AevixConfig> = {};
+  const updated: Partial<ReveraConfig> = {};
 
   try {
     if (key === 'cacheTtlMs' || key === 'minScoreThreshold') {
@@ -58,8 +58,8 @@ export function handleConfigSet(key: string, value: string): void {
     const saved = saveConfig(updated);
     console.log(
       chalk.green(
-        `${theme.icons.success}  Updated: ${chalk.bold(key)} = ${chalk.bold(String(saved[key as keyof AevixConfig]))}`
-      )
+        `${theme.icons.success}  Updated: ${chalk.bold(key)} = ${chalk.bold(String(saved[key as keyof ReveraConfig]))}`,
+      ),
     );
   } catch (err: any) {
     console.error(chalk.red(`Error setting config: ${err.message}`));
@@ -77,28 +77,26 @@ export function handleConfigList(): void {
   };
 
   console.log();
-  console.log(theme.colors.primary.bold('  ▲ AEVIX CONFIGURATION'));
+  console.log(theme.colors.primary.bold('  ▲ REVERA CONFIGURATION'));
   console.log(theme.colors.muted('  ' + '─'.repeat(45)));
 
   const rows: [string, string, string][] = [
-    ['githubToken',       hideToken(config.githubToken),              'string'],
-    ['cacheTtlMs',        config.cacheTtlMs.toString(),               'number'],
-    ['minScoreThreshold', config.minScoreThreshold.toString(),        'number'],
-    ['installSuggest',    config.installSuggest ? 'true' : 'false',   'boolean'],
-    ['packageManager',    config.packageManager,                      'string'],
-    ['theme',             config.theme,                               'string'],
+    ['githubToken', hideToken(config.githubToken), 'string'],
+    ['cacheTtlMs', config.cacheTtlMs.toString(), 'number'],
+    ['minScoreThreshold', config.minScoreThreshold.toString(), 'number'],
+    ['installSuggest', config.installSuggest ? 'true' : 'false', 'boolean'],
+    ['packageManager', config.packageManager, 'string'],
+    ['theme', config.theme, 'string'],
   ];
 
   for (const [key, val, type] of rows) {
-    const keyStr  = chalk.white(key.padEnd(22));
-    const valStr  = key === 'installSuggest'
-      ? (val === 'true' ? chalk.green(val) : chalk.red(val))
-      : chalk.cyan(val);
+    const keyStr = chalk.white(key.padEnd(22));
+    const valStr = key === 'installSuggest' ? (val === 'true' ? chalk.green(val) : chalk.red(val)) : chalk.cyan(val);
     const typeStr = chalk.gray(type);
     console.log(`  ${keyStr} ${valStr.padEnd(20)}  ${typeStr}`);
   }
 
   console.log();
-  console.log(chalk.dim('  Config path: ~/.aevix/config.json'));
+  console.log(chalk.dim('  Config path: ~/.revera/config.json'));
   console.log();
 }
