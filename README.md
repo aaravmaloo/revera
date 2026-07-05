@@ -151,7 +151,13 @@ Audit direct dependencies only, skipping transitive dependencies:
 aevix audit --direct
 ```
 
-### 5. CLI Settings
+### 5. GitHub Authentication
+Authenticate with GitHub to increase API rate limits (60/hour anonymous vs 5,000/hour authenticated). You can choose between browser-based OAuth2 or manually entering a Personal Access Token. Once authorized, Aevix securely encrypts and stores the token in your OS keyring (Windows DPAPI, macOS Keychain, or Linux Secret Service):
+```bash
+aevix login
+```
+
+### 6. CLI Settings
 Manage local settings saved in `~/.aevix/config.json`:
 ```bash
 aevix config
@@ -159,20 +165,20 @@ aevix config set minScoreThreshold 75
 aevix config get minScoreThreshold
 ```
 
-### 6. System Doctor
+### 7. System Doctor
 Verify environment settings, API status, and network connection latencies:
 ```bash
 aevix doctor
 ```
 
-### 7. Cache Control
+### 8. Cache Control
 Inspect or clear local metadata cache:
 ```bash
 aevix cache
 aevix cache clear
 ```
 
-### 8. Update Check
+### 9. Update Check
 Verify if you are running the latest version of the Aevix engine:
 ```bash
 aevix update
