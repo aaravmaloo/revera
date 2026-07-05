@@ -1,10 +1,10 @@
 # Revera
 
-[![npm version](https://img.shields.io/npm/v/revera.svg?style=flat-square&color=blue)](https://www.npmjs.com/package/revera)
+[![npm version](https://img.shields.io/npm/v/@aaravmaloo/revera.svg?style=flat-square&color=blue)](https://www.npmjs.com/package/revera)
 [![build status](https://img.shields.io/github/actions/workflow/status/aaravmaloo/revera/ci.yml?branch=main&style=flat-square)](https://github.com/aaravmaloo/revera/actions)
-[![node version](https://img.shields.io/badge/node-%3E%3D22.0.0-brightgreen?style=flat-square)](https://nodejs.org/)
-[![typescript](https://img.shields.io/badge/TypeScript-5.x-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
-[![license](https://img.shields.io/npm/l/revera.svg?style=flat-square&color=yellow)](LICENSE)
+[![node version](https://img.shields.io/badge/node-%3E%3D20-brightgreen?style=flat-square)](https://nodejs.org/)
+[![typescript](https://img.shields.io/badge/TypeScript-5.5-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
+[![license](https://img.shields.io/npm/l/@aaravmaloo/revera.svg?style=flat-square&color=yellow)](LICENSE)
 [![coverage](https://img.shields.io/badge/coverage-100%25-brightgreen?style=flat-square)](https://github.com/aaravmaloo/revera)
 
 > The credit score for npm packages.
@@ -101,7 +101,7 @@ $ revera why request
 Install globally to access the executable from any directory:
 
 ```bash
-npm install -g revera
+npm install -g @aaravmaloo/revera
 ```
 
 ---
