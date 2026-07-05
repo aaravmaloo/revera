@@ -5,7 +5,7 @@
   "type": "module",
   "main": "./dist/cli.js",
   "bin": {
-    "revera": "./dist/cli.js"
+    "revera": "dist/cli.js"
   },
   "files": [
     "dist",
