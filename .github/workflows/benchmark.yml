@@ -24,21 +24,6 @@ jobs:
         with:
           fetch-depth: 0 # needed for full git history and tag checking
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9
-
-      - name: Install Benchmarker Dependencies
-        run: |
-          cd benchmarker
-          npm install
-
       - name: Run Benchmark
         run: |
           # Use a persistent dataset directory on the server to avoid re-fetching 34k packages on every commit
