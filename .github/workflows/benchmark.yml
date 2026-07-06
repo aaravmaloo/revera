@@ -24,6 +24,11 @@ jobs:
         with:
           fetch-depth: 0 # needed for full git history and tag checking
 
+      - name: Install benchmarker dependencies
+        run: |
+          cd benchmarker
+          npm install
+          
       - name: Run Benchmark
         run: |
           # Use a persistent dataset directory on the server to avoid re-fetching 34k packages on every commit

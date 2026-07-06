@@ -142,6 +142,9 @@ REVERA_VERSION=$(node -e "const p=require('$BUILD_DIR/package.json'); process.st
 ok "Built revera v${REVERA_VERSION} → $REVERA_DIST"
 
 # ── Set up benchmarker ────────────────────────────────────────────────────────
+info "Installing benchmarker dependencies..."
+(cd "$SCRIPT_DIR" && npm install) || die "npm install failed"
+
 info "Compiling benchmarker TypeScript..."
 (cd "$SCRIPT_DIR" && npm run build) || die "TypeScript compilation failed"
 
