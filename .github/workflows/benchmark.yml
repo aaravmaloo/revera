@@ -1,0 +1,93 @@
+name: Revera Safety & Throughput Benchmark
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - 'reports/**'
+      - 'README.md'
+      - 'docs/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  benchmark:
+    name: Run Benchmark
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # needed for full git history and tag checking
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Install Benchmarker Dependencies
+        run: |
+          cd benchmarker
+          npm install
+
+      - name: Run Benchmark
+        run: |
+          # Use a persistent dataset directory on the server to avoid re-fetching 34k packages on every commit
+          PERSISTENT_DATASET_DIR="$HOME/revera_datasets"
+          mkdir -p "$PERSISTENT_DATASET_DIR"
+          
+          # If persistent dataset does not exist, fetch it once
+          if [ ! -f "$PERSISTENT_DATASET_DIR/npm.jsonl" ]; then
+            echo "Persistent dataset not found. Generating now..."
+            cd benchmarker
+            mkdir -p datasets
+            npm run fetch-dataset
+            cp datasets/npm.jsonl "$PERSISTENT_DATASET_DIR/npm.jsonl"
+            cd ..
+          fi
+
+          # Execute the benchmark pointing to the persistent dataset
+          cd benchmarker
+          chmod +x benchmark.sh
+          ./benchmark.sh --workers 4 --dataset "$PERSISTENT_DATASET_DIR/npm.jsonl" --output-dir "$HOME/revera_benchmarks" --repo "$GITHUB_WORKSPACE" --branch "$GITHUB_SHA"
+
+      - name: Commit and Push Benchmark Reports
+        run: |
+          # Get the latest run ID directory
+          LATEST_RUN_DIR=$(ls -td $HOME/revera_benchmarks/*/ | head -1)
+          RUN_ID=$(basename "$LATEST_RUN_DIR")
+          
+          # Create reports directory in repository
+          REPO_REPORT_DIR="reports/benchmark_${RUN_ID}"
+          mkdir -p "$REPO_REPORT_DIR"
+          
+          # Copy reports and summaries
+          cp "$LATEST_RUN_DIR/metadata.json" "$REPO_REPORT_DIR/"
+          cp "$LATEST_RUN_DIR/summary.json" "$REPO_REPORT_DIR/"
+          cp "$LATEST_RUN_DIR/report.html" "$REPO_REPORT_DIR/"
+          
+          # Only copy comparison if it exists
+          if [ -f "$LATEST_RUN_DIR/comparison.json" ]; then
+            cp "$LATEST_RUN_DIR/comparison.json" "$REPO_REPORT_DIR/"
+          fi
+          
+          # Compress results.jsonl (it can be 10-15MB) to keep git repository lightweight
+          if [ -f "$LATEST_RUN_DIR/results.jsonl" ]; then
+            gzip -c "$LATEST_RUN_DIR/results.jsonl" > "$REPO_REPORT_DIR/results.jsonl.gz"
+          fi
+
+          # Push back to the repository (using [skip ci] to prevent triggering another run)
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add reports/
+          git commit -m "docs: add benchmark results for run ${RUN_ID} [skip ci]"
+          git push origin master
