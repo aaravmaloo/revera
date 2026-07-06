@@ -1,0 +1,19 @@
+{
+  "name": "revera-benchmarker",
+  "version": "1.0.0",
+  "description": "Large-scale benchmark suite for the Revera security tool",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "fetch-dataset": "tsx scripts/fetch-dataset.ts",
+    "bench": "bash benchmark.sh"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

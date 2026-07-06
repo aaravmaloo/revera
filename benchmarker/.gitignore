@@ -1,0 +1,8 @@
+dist/
+node_modules/
+
+# Generated datasets (run fetch-dataset.ts to populate)
+datasets/npm.jsonl
+datasets/pypi.jsonl
+datasets/crates.jsonl
+datasets/go.jsonl
