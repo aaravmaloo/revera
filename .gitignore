@@ -3,8 +3,7 @@ dist/
 coverage/
 .revera/
 .env
+#ignoring logs and local files
 *.log
 .DS_Store
 *.tgz
-benchmarker/ 
-#ignoring benchmarker folder since it is a seperate repo.
