@@ -1,0 +1,13 @@
+{
+  "run_id": "2026-07-06T15-00-30",
+  "commit": "unknown",
+  "branch": "unknown",
+  "hostname": "main-server",
+  "started_at": "2026-07-06T15:00:30.684Z",
+  "revera_version": "0.1.0",
+  "dataset_path": "/home/aaravmaloo/revera_datasets/npm.jsonl",
+  "dataset_lines": 17085,
+  "worker_count": 4,
+  "score_threshold": 60,
+  "finished_at": "2026-07-06T16:50:55.394Z"
+}

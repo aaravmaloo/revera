@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Revera Benchmark — 2026-07-06T15-00-30</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface2: #273549;
+      --border: #334155;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #6366f1;
+      --good: #22c55e;
+      --bad: #ef4444;
+      --warn: #f97316;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; line-height: 1.6; }
+    a { color: var(--accent); }
+    header {
+      background: linear-gradient(135deg, #312e81 0%, #1e1b4b 50%, #0f172a 100%);
+      padding: 2.5rem 2rem 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+    header h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; }
+    header h1 span { color: var(--accent); }
+    header .sub { color: var(--muted); font-size: 0.9rem; margin-top: 0.3rem; }
+    header .accuracy-hero { font-size: 3.5rem; font-weight: 800; color: var(--good); margin-top: 0.75rem; }
+    main { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; display: grid; gap: 1.5rem; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
+    .card h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: var(--text); }
+    .card h3 { font-size: 0.95rem; font-weight: 600; margin: 1.25rem 0 0.75rem; color: var(--muted); }
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; }
+    .stat-grid.compact { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+    .stat { background: var(--surface2); border-radius: 8px; padding: 0.9rem 1rem; text-align: center; }
+    .stat-value { font-size: 1.6rem; font-weight: 700; }
+    .stat-label { font-size: 0.75rem; color: var(--muted); margin-top: 0.2rem; }
+    .meta-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    .meta-table th { text-align: left; color: var(--muted); padding: 0.4rem 0.75rem 0.4rem 0; font-weight: 500; width: 160px; }
+    .meta-table td { padding: 0.4rem 0; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .data-table th { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 2px solid var(--border); color: var(--muted); font-weight: 500; }
+    .data-table td { padding: 0.45rem 0.75rem; border-bottom: 1px solid var(--border); }
+    .data-table tr:hover td { background: var(--surface2); }
+    code { font-family: 'Fira Code', 'JetBrains Mono', monospace; font-size: 0.85em; background: var(--surface2); padding: 0.1em 0.4em; border-radius: 4px; }
+    .good { color: var(--good); }
+    .bad { color: var(--bad); }
+    .muted { color: var(--muted); font-size: 0.9rem; }
+    .badge { display: inline-block; padding: 0.15em 0.5em; border-radius: 999px; font-size: 0.8rem; font-weight: 600; }
+    .badge.good { background: #14532d; color: var(--good); }
+    .badge.bad { background: #450a0a; color: var(--bad); }
+    .badge.neutral { background: var(--surface2); color: var(--muted); }
+    .label-badge { display: inline-block; padding: 0.15em 0.6em; border-radius: 999px; font-size: 0.78rem; font-weight: 600; }
+    .label-trusted    { background: #14532d; color: #4ade80; }
+    .label-malicious  { background: #450a0a; color: #f87171; }
+    .label-typosquat  { background: #431407; color: #fb923c; }
+    .label-suspicious { background: #412006; color: #fbbf24; }
+    .label-unknown    { background: #1e293b; color: #94a3b8; }
+    footer { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 2rem; }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<header>
+  <h1><span>Revera</span> Benchmark Report</h1>
+  <div class="sub">2026-07-06T15-00-30 &nbsp;·&nbsp; main-server &nbsp;·&nbsp; 4 workers</div>
+  <div class="accuracy-hero">96.5%</div>
+  <div class="sub">accuracy across 7,063 labeled packages</div>
+</header>
+<main>
+  
+<section class="card meta-card">
+  <h2>Run Metadata</h2>
+  <table class="meta-table">
+    <tr><th>Run ID</th><td><code>2026-07-06T15-00-30</code></td></tr>
+    <tr><th>Commit</th><td><code>unknown</code></td></tr>
+    <tr><th>Branch</th><td><code>unknown</code></td></tr>
+    <tr><th>Host</th><td>main-server</td></tr>
+    <tr><th>Started</th><td>2026-07-06T15:00:30.684Z</td></tr>
+    <tr><th>Finished</th><td>2026-07-06T16:50:55.394Z</td></tr>
+    <tr><th>Elapsed</th><td>6624.7s</td></tr>
+    <tr><th>Revera version</th><td><code>0.1.0</code></td></tr>
+    <tr><th>Workers</th><td>4</td></tr>
+    <tr><th>Packages</th><td>17,085</td></tr>
+    <tr><th>Score threshold</th><td>60</td></tr>
+  </table>
+</section>
+  
+<section class="card stats-card">
+  <h2>Overall Results</h2>
+  <div class="stat-grid">
+    <div class="stat">
+      <div class="stat-value">96.5%</div>
+      <div class="stat-label">Accuracy</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">6,817</div>
+      <div class="stat-label">Correct</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">246</div>
+      <div class="stat-label">Incorrect</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">230</div>
+      <div class="stat-label">False Positives</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">16</div>
+      <div class="stat-label">False Negatives</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">27</div>
+      <div class="stat-label">Errors (0.2%)</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">2.6/s</div>
+      <div class="stat-label">Throughput</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">1267.0ms</div>
+      <div class="stat-label">p50 latency</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">2735.0ms</div>
+      <div class="stat-label">p95 latency</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">3883.0ms</div>
+      <div class="stat-label">p99 latency</div>
+    </div>
+  </div>
+</section>
+  
+<section class="card chart-card">
+  <h2>Score Distribution</h2>
+  <canvas id="distChart" height="180"></canvas>
+  <script>
+    (function() {
+      var ctx = document.getElementById('distChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ["0–20","21–40","41–60","61–80","81–100"],
+          datasets: [{
+            label: 'Packages',
+            data: [155,26,6077,8938,1862],
+            backgroundColor: ['#ef4444','#f97316','#eab308','#22c55e','#10b981'],
+            borderRadius: 6,
+            borderSkipped: false,
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, grid: { color: '#334155' }, ticks: { color: '#94a3b8' } },
+            x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+          }
+        }
+      });
+    })();
+  </script>
+</section>
+  
+<section class="card">
+  <h2>Results by Label</h2>
+  <table class="data-table">
+    <thead><tr>
+      <th>Label</th><th>Total</th><th>Correct</th><th>Incorrect</th><th>Errors</th><th>Accuracy</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="label-badge label-trusted">trusted</span></td>
+        <td>7,051</td>
+        <td>6,808</td>
+        <td>230</td>
+        <td>13</td>
+        <td>96.6%</td>
+      </tr>
+      <tr>
+        <td><span class="label-badge label-malicious">malicious</span></td>
+        <td>9</td>
+        <td>2</td>
+        <td>7</td>
+        <td>0</td>
+        <td>22.2%</td>
+      </tr>
+      <tr>
+        <td><span class="label-badge label-typosquat">typosquat</span></td>
+        <td>20</td>
+        <td>7</td>
+        <td>4</td>
+        <td>9</td>
+        <td>35.0%</td>
+      </tr>
+      <tr>
+        <td><span class="label-badge label-suspicious">suspicious</span></td>
+        <td>5</td>
+        <td>0</td>
+        <td>5</td>
+        <td>0</td>
+        <td>0.0%</td>
+      </tr>
+      <tr>
+        <td><span class="label-badge label-unknown">unknown</span></td>
+        <td>10,000</td>
+        <td>0</td>
+        <td>0</td>
+        <td>5</td>
+        <td>0.0%</td>
+      </tr></tbody>
+  </table>
+</section>
+  
+</main>
+<footer>Generated by revera-benchmarker · Mon, 06 Jul 2026 16:50:56 GMT</footer>
+</body>
+</html>
