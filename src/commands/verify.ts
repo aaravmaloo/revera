@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import chalk from 'chalk';
 import ora from 'ora';
-import { analyzePackage } from '../engine/index.js';
+import { analyzePackage, buildDAG, propagateRisk, DAGNode } from '../engine/index.js';
 import { loadConfig } from '../utils/config.js';
 import { theme } from '../ui/theme.js';
 import * as logger from '../utils/logger.js';
@@ -24,70 +24,6 @@ export interface VerifyOptions {
   prodOnly?: boolean;
   onlyModules?: boolean;
   threads?: number;
-}
-
-interface DepMeta {
-  isDirect: boolean;
-  isProd: boolean;
-  dependents: Set<string>;
-  depth: number;
-}
-
-// Recursively traverse dependency tree to split prod/dev and build dependents counts
-function resolveDependencyGraph(
-  prodDirect: string[],
-  devDirect: string[],
-  nodeModulesDir: string,
-): Map<string, DepMeta> {
-  const graph = new Map<string, DepMeta>();
-
-  function traverse(pkgNames: string[], isProd: boolean, parentName: string | null, depth: number) {
-    for (const name of pkgNames) {
-      let meta = graph.get(name);
-      if (!meta) {
-        meta = {
-          isDirect: depth === 0,
-          isProd,
-          dependents: new Set<string>(),
-          depth,
-        };
-        graph.set(name, meta);
-      }
-
-      if (parentName) {
-        meta.dependents.add(parentName);
-      }
-
-      // If we discover a package via a production dependency path, upgrade it to isProd = true
-      if (isProd) {
-        meta.isProd = true;
-      }
-
-      // Read transitive children from its package.json in node_modules
-      try {
-        const pkgJsonPath = path.join(nodeModulesDir, name, 'package.json');
-        if (fs.existsSync(pkgJsonPath)) {
-          const content = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf-8'));
-          const childDeps = Object.keys(content.dependencies || {});
-
-          // Avoid recursion stack overflow on cyclic dependencies by only traversing children
-          // if we are visiting at a shallower or equal depth
-          const currentMeta = graph.get(name);
-          if (currentMeta && currentMeta.depth >= depth) {
-            traverse(childDeps, isProd, name, depth + 1);
-          }
-        }
-      } catch {
-        // ignore
-      }
-    }
-  }
-
-  // Traversal order ensures prod takes precedence over dev
-  traverse(prodDirect, true, null, 0);
-  traverse(devDirect, false, null, 0);
-
-  return graph;
 }
 
 function getPackageImportance(res: ScanResult): { level: string; label: string; reason: string } {
@@ -189,25 +125,33 @@ export async function handleVerify(options: VerifyOptions): Promise<void> {
     return;
   }
 
-  let depMap: Map<string, DepMeta>;
+  let dag: Map<string, DAGNode>;
 
   if (options.onlyModules) {
-    depMap = new Map();
-    prodDirect.forEach((name) => depMap.set(name, { isDirect: true, isProd: true, dependents: new Set(), depth: 0 }));
-    devDirect.forEach((name) => depMap.set(name, { isDirect: true, isProd: false, dependents: new Set(), depth: 0 }));
+    dag = buildDAG(prodDirect, devDirect, nodeModulesDir);
+    // Remove all transitive nodes and dependencies from direct nodes to make it direct-only
+    const directNames = new Set([...prodDirect, ...devDirect]);
+    for (const [name, node] of dag.entries()) {
+      if (!directNames.has(name)) {
+        dag.delete(name);
+      } else {
+        node.dependencies.clear();
+        node.dependents.clear();
+      }
+    }
     console.log(chalk.gray(`  Scanning direct dependencies only (${directDeps.length} packages)\n`));
   } else {
     const spinner2 = ora({ text: '  Resolving dependency tree...', indent: 0 }).start();
-    depMap = resolveDependencyGraph(prodDirect, devDirect, nodeModulesDir);
-    const transCount = depMap.size - directDeps.length;
+    dag = buildDAG(prodDirect, devDirect, nodeModulesDir);
+    const transCount = dag.size - directDeps.length;
     spinner2.succeed(
-      chalk.gray(`  ${depMap.size} packages resolved`) +
+      chalk.gray(`  ${dag.size} packages resolved`) +
         chalk.dim(`  ·  ${directDeps.length} direct  ·  ${transCount} transitive`),
     );
     console.log();
   }
 
-  const pkgEntries = [...depMap.entries()];
+  const pkgEntries = [...dag.entries()];
   const total = pkgEntries.length;
   const results: ScanResult[] = [];
   const threads = options.threads || 1;
@@ -221,47 +165,48 @@ export async function handleVerify(options: VerifyOptions): Promise<void> {
     while (queue.length > 0) {
       const item = queue.shift();
       if (!item) break;
-      const [pkgName, meta] = item;
+      const [pkgName, node] = item;
 
-      let installedVersion = 'unknown';
-      try {
-        const nmPkgPath = path.join(nodeModulesDir, pkgName, 'package.json');
-        if (fs.existsSync(nmPkgPath)) {
-          const nmPkg = JSON.parse(fs.readFileSync(nmPkgPath, 'utf-8'));
-          installedVersion = nmPkg.version || 'unknown';
-        }
-      } catch {
-        // ignore
-      }
+      let installedVersion = node.version;
 
       try {
         const report = await analyzePackage(pkgName, { silent: true });
-        results.push({
-          name: pkgName,
-          installedVersion,
-          score: report.overallScore,
-          recommendation: report.recommendation,
-          vulnerabilitiesCount: report.negativeSignals.filter((s) => s.includes('vulnerability')).length,
-          warnings: report.warnings.filter((w) => w !== 'None'),
-          isDirect: meta.isDirect,
-          isProd: meta.isProd,
-          dependents: meta.dependents,
-          depth: meta.depth,
-        });
+        node.intrinsicRisk = report.intrinsicRisk;
+        node.tainted = report.tainted;
+        node.credibleInterval = report.credibleInterval;
+        node.report = report;
       } catch (err: any) {
         logger.warn(`Verification failed for "${pkgName}": ${err.message}`);
-        results.push({
-          name: pkgName,
-          installedVersion,
-          score: 0,
+        node.intrinsicRisk = 1.0;
+        node.tainted = true;
+        node.credibleInterval = [1.0, 1.0];
+        node.report = {
+          packageName: pkgName,
+          version: installedVersion,
+          overallScore: 0,
           recommendation: 'Error',
-          vulnerabilitiesCount: 0,
+          categoryScores: {
+            maintenance: 0,
+            stability: 0,
+            security: 0,
+            quality: 0,
+            ecosystem: 0,
+            documentation: 0,
+            developerExperience: 0,
+            publisherTrust: 0,
+          },
+          positiveSignals: [],
+          negativeSignals: [`Check failed: ${err.message}`],
           warnings: [`Check failed: ${err.message}`],
-          isDirect: meta.isDirect,
-          isProd: meta.isProd,
-          dependents: meta.dependents,
-          depth: meta.depth,
-        });
+          summary: `Check failed: ${err.message}`,
+          trustIncident: null,
+          typosquatWarning: null,
+          intrinsicRisk: 1.0,
+          effectiveRisk: 1.0,
+          credibleInterval: [1.0, 1.0],
+          tainted: true,
+          blastRadius: 0,
+        };
       }
 
       completed++;
@@ -274,6 +219,28 @@ export async function handleVerify(options: VerifyOptions): Promise<void> {
 
   spinner.succeed(chalk.gray(`  Scanned ${total} packages`));
   console.log();
+
+  // Run Stage 3: Risk propagation
+  propagateRisk(dag);
+
+  // Map DAG nodes back to ScanResult format for printing
+  for (const [pkgName, node] of dag.entries()) {
+    const report = node.report;
+    results.push({
+      name: pkgName,
+      installedVersion: node.version,
+      score: report.overallScore,
+      recommendation: report.recommendation,
+      vulnerabilitiesCount: report.negativeSignals
+        ? report.negativeSignals.filter((s: string) => s.includes('vulnerability')).length
+        : 0,
+      warnings: report.warnings ? report.warnings.filter((w: string) => w !== 'None') : [],
+      isDirect: node.isDirect,
+      isProd: node.isProd,
+      dependents: node.dependents,
+      depth: node.depth,
+    });
+  }
 
   const healthy = results.filter((r) => r.score >= config.minScoreThreshold && r.warnings.length === 0);
   const reviewed = results.filter((r) => r.score >= config.minScoreThreshold && r.warnings.length > 0);

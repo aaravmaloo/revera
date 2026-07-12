@@ -66,9 +66,12 @@ export async function analyzePackage(
       logger.info(`No GitHub repository found in manifest for ${packageName}`);
     }
 
-    // Step 4: Check OSV vulnerabilities
-    if (spinner) spinner.text = `Checking vulnerabilities for ${packageName}@${latestVersion}...`;
+    // Step 4: Check vulnerabilities across OSV, GitHub Advisory DB, and npm registry
+    if (spinner) spinner.text = `Checking vulnerabilities (OSV + GitHub + npm) for ${packageName}@${latestVersion}...`;
     const vulnerabilities = await checkVulnerabilities(packageName, latestVersion, offline);
+    if (vulnerabilities.failedSources.length > 0) {
+      logger.warn(`Vuln sources unavailable for ${packageName}: ${vulnerabilities.failedSources.join(', ')}`);
+    }
 
     // Step 5: Publisher trust and typosquat checks (synchronous, no network)
     const trustResult = checkPublisherTrust(packageName);
@@ -100,3 +103,6 @@ export async function analyzePackage(
     throw err;
   }
 }
+
+export * from './dag.js';
+export * from './propagation.js';
