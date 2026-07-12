@@ -1,0 +1,38 @@
+# Normalize all text files to LF in the repo, regardless of OS.
+# Git will still check out CRLF on Windows if core.autocrlf=true,
+# but the index always stores LF — so no phantom diffs.
+
+*             text=auto eol=lf
+
+# Explicitly text files
+*.ts          text eol=lf
+*.tsx         text eol=lf
+*.js          text eol=lf
+*.jsx         text eol=lf
+*.json        text eol=lf
+*.md          text eol=lf
+*.mmd         text eol=lf
+*.yml         text eol=lf
+*.yaml        text eol=lf
+*.sh          text eol=lf
+*.css         text eol=lf
+*.html        text eol=lf
+*.txt         text eol=lf
+*.toml        text eol=lf
+.gitignore    text eol=lf
+.gitattributes text eol=lf
+
+# Binary — never touch line endings
+*.png         binary
+*.jpg         binary
+*.jpeg        binary
+*.gif         binary
+*.ico         binary
+*.woff        binary
+*.woff2       binary
+*.ttf         binary
+*.otf         binary
+*.eot         binary
+*.gz          binary
+*.zip         binary
+*.tgz         binary
