@@ -30,6 +30,7 @@ import type {
 import { loadCheckpoint, appendCheckpoint, packageKey } from './checkpoint.js';
 import { findPreviousBenchmarkDir, generateComparison } from './compare.js';
 import { generateHtmlReport } from './report.js';
+import { generateMarkdownReport } from './markdown-report.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -384,9 +385,10 @@ async function main(): Promise<void> {
     }
   }
 
-  // ── Generate HTML report ──────────────────────────────────────────────────
-  console.log('▶  Generating HTML report...');
+  // ── Generate reports ────────────────────────────────────────────────────
+  console.log('▶  Generating reports...');
   generateHtmlReport(runDir, meta, summary, comparison);
+  generateMarkdownReport(runDir, meta, summary, comparison);
 
   // ── Print final summary ───────────────────────────────────────────────────
   const acc = (summary.accuracy * 100).toFixed(2);
@@ -411,7 +413,8 @@ async function main(): Promise<void> {
   }
 
   console.log('────────────────────────────────────────────────────');
-  console.log(`\n✓  Results saved to: ${runDir}`);
+  console.log(`✓  Results saved to: ${runDir}`);
+  console.log(`   BENCHMARK.md  → GitHub-readable report`);
   console.log(`   report.html   → open in browser`);
   console.log(`   results.jsonl → all ${allResults.length.toLocaleString()} results`);
   console.log(`   summary.json  → aggregated stats\n`);
