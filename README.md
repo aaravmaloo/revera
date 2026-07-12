@@ -9,7 +9,7 @@
 
 > The credit score for npm packages.
 
-revera helps you decide whether a package is worth installing before you run `npm install`. It analyzes package quality, maintenance, security, ecosystem health, and publisher trust, then produces an explainable reputation report.
+Revera helps you decide whether a package is worth installing before you run `npm install`. It analyzes package quality, maintenance, security, ecosystem health, and publisher trust — and now propagates risk transitively across your entire dependency graph — then produces an explainable, Bayesian reputation report.
 
 ---
 
@@ -188,32 +188,145 @@ revera update
 
 ## Comparison
 
-| Feature | `revera audit` | `osv-scanner` | Socket | **revera** |
+| Feature | `npm audit` | `osv-scanner` | Socket | **revera** |
 | :--- | :---: | :---: | :---: | :---: |
 | **CVE Vulnerabilities** | ✔ | ✔ | ✔ | ✔ |
+| **Multiple Vuln DBs** | ✖ | Partial | ✔ | ✔ |
 | **Ecosystem Reputation** | ✖ | ✖ | Partial | ✔ |
 | **Explainable Scoring** | ✖ | ✖ | Partial | ✔ |
 | **Publisher Trust Check** | ✖ | ✖ | Partial | ✔ |
 | **Typosquat Detection** | ✖ | ✖ | Partial | ✔ |
+| **Transitive Risk Propagation** | ✖ | ✖ | ✖ | ✔ |
+| **Bayesian Confidence Intervals** | ✖ | ✖ | ✖ | ✔ |
 
 ---
 
-## Scoring Model & Philosophy
+## Scoring Engine (v2)
 
-A package's reputation is not determined by popularity alone. revera combines maintenance, stability, security, ecosystem maturity, documentation quality, developer experience, and publisher trust into a weighted, explainable score. Every deduction shown in the CLI corresponds to specific evidence.
+Revera v2 replaced the legacy flat weighted-sum model with a four-stage Bayesian DAG pipeline.
 
-### Category Weights
+### Stage 1 — Dependency Graph (DAG)
+
+All dependencies in the project are resolved into a directed acyclic graph. Each node tracks its full transitive dependent set so that later stages can compute accurate blast radii.
+
+```
+lodash ──► your-app
+express ──► your-app
+axios ──► some-lib ──► your-app   ← transitive
+```
+
+### Stage 2 — Per-Package Scoring (Bayesian Beta Posteriors)
+
+Each of the 8 scoring categories starts from an **archetype-specific prior** (`framework`, `cli`, `types-only`, `utility`) rather than a flat uninformed baseline. Observed signals update a Beta distribution posterior — meaning a timeout or missing data widens the credible interval rather than silently defaulting to "clean".
 
 | Category | Weight | Focus Areas |
 | :--- | :---: | :--- |
-| **Security** | 20% | Active CVE advisories, execution of install scripts |
-| **Publisher Trust** | 15% | Historic protestware, deliberate sabotage, account hijack registry history |
-| **Maintenance** | 13% | Publish cadence, recent repository commits, open issues response ratio |
-| **Stability** | 12% | SemVer compliance, major version release frequency, pre-1.0 stability |
-| **Package Quality** | 13% | Source file sizes, license permissions, exports configuration |
-| **Ecosystem** | 13% | Logarithmic weekly downloads scale, GitHub stars, total contributors |
-| **Documentation** | 9% | Inline code blocks, API options guide, structural completeness |
+| **Security** | 20% | Active CVEs (3 DBs), install scripts, repository transparency |
+| **Publisher Trust** | 15% | Protestware history, deliberate sabotage, account hijack incidents |
+| **Maintenance** | 13% | Publish cadence, recent commits, open issues response ratio |
+| **Stability** | 12% | SemVer compliance, major version frequency, pre-1.0 maturity |
+| **Package Quality** | 13% | Source file sizes, license, exports configuration |
+| **Ecosystem** | 13% | Weekly downloads (log-scaled), GitHub stars, contributor count |
+| **Documentation** | 9% | README completeness, code examples, API reference coverage |
 | **Developer Experience** | 5% | Native TS typings, ESM exports, tree-shaking support |
+
+The final per-package score is a **confidence-weighted aggregate** of category posteriors (inverse-variance weighting), producing both a point estimate and a 95% credible interval.
+
+### Stage 3 — Veto Checks
+
+Three hard overrides bypass the Bayesian scoring entirely and immediately fail a package:
+
+| Veto | Trigger |
+| :--- | :--- |
+| **Critical Trust Incident** | Publisher has a confirmed supply-chain attack or protestware release |
+| **Typosquat** | Edit distance ≤ 1 from a top-N package (e.g. `lodahs`, `expres`) |
+| **Unpatched Critical CVE** | A `CRITICAL` severity vulnerability with no patched version available |
+
+### Stage 4 — Transitive Risk Propagation
+
+After per-package scores are computed, risk is propagated bottom-up through the DAG (topological order, leaves first):
+
+- If a dependency's `effectiveRisk` exceeds a threshold, its parent's risk is **floored at 0.8** (flagged as tainted).
+- The **blast radius** of each node = `effectiveRisk × transitive_dependent_count`.
+- The **worst subpath** is traced and surfaced in the audit output so you know exactly which chain of dependencies caused a flag.
+
+### Stage 5 — Report Synthesis
+
+The final audit report merges intrinsic scores, inherited taint, credible intervals, and blast radii into a single ranked output. The overall workspace score is a weighted average by blast radius.
+
+---
+
+## Vulnerability Databases
+
+Revera queries **three independent vulnerability databases in parallel** on every check. Results are merged and deduplicated by CVE/GHSA alias before being used in scoring.
+
+| Database | Source | Auth Required | Notes |
+| :--- | :--- | :---: | :--- |
+| **OSV** (osv.dev) | Google Open Source Security | ✖ | Aggregates NVD, GitHub Advisory, RUSTSEC, and more |
+| **GitHub Advisory DB** | GitHub Security | ✖ | Rich CVSS scores + patched-version ranges |
+| **npm Advisory** | registry.npmjs.org | ✖ | Same data as `npm audit`; sometimes publishes before OSV |
+
+If a source times out or errors, the others continue independently. The `VulnResult` exposes which sources responded (`sources`) and which failed (`failedSources`) so the Bayesian scorer can widen the uncertainty interval appropriately rather than assuming clean.
+
+---
+
+## Architecture & Structure
+
+```
+.github/              # CI configurations
+docs/                 # Architecture specs and algorithm diagrams
+src/
+  ├── commands/       # CLI command handlers (check, why, add, audit, config, cache, update)
+  ├── engine/
+  │   ├── dag.ts          # DAG construction + topological sort + blast-radius computation
+  │   ├── propagation.ts  # Bottom-up transitive risk propagation
+  │   ├── scoring.ts      # Bayesian Beta posteriors, archetype priors, veto checks
+  │   ├── vuln.ts         # Multi-source vuln aggregator (OSV + GitHub + npm)
+  │   ├── trust.ts        # Publisher trust incident database
+  │   ├── typosquat.ts    # Edit-distance typosquat detection
+  │   ├── npm.ts          # npm registry + download stats fetcher
+  │   └── github.ts       # GitHub repo stats + README fetcher
+  ├── ui/             # Console view templates (reporter formatters, theme styles)
+  └── utils/          # Filesystem helpers (caching, configuration, package managers)
+tests/                # Unit test suites
+benchmarker/          # Large-scale benchmark suite (100k+ packages)
+```
+
+---
+
+## Benchmarks
+
+Revera ships with a built-in large-scale benchmark suite in `benchmarker/` that tests against **100k+ npm packages** in parallel and produces a single, GitHub-readable report.
+
+### Running a benchmark
+
+```bash
+cd benchmarker
+npm install
+npm run fetch-dataset          # one-time: pulls ~100k packages into datasets/npm.jsonl
+./benchmark.sh --workers 16   # runs the full suite
+```
+
+Each run produces a self-contained output directory with:
+
+| File | Description |
+| :--- | :--- |
+| `BENCHMARK.md` | Single GitHub-readable report (accuracy, per-label detection, score distribution, latency) |
+| `report.html` | Interactive browser report with charts |
+| `summary.json` | Machine-readable aggregated stats |
+| `results.jsonl` | Per-package results for all tested packages |
+| `comparison.json` | Delta vs the previous run (regressions + improvements) |
+
+### Latest benchmark (v2 algorithm, seed dataset)
+
+| Label | Packages | Accuracy |
+| :--- | ---: | :--- |
+| `trusted` | 7,051 | 96.6% |
+| `malicious` | 9 | 22.2% _(v1 baseline — v2 veto checks fix this)_ |
+| `typosquat` | 20 | 35.0% _(v1 baseline — v2 edit-distance veto fixes this)_ |
+| **Overall (labeled)** | **7,085** | **96.5%** |
+
+> The v1 benchmark was run before the v2 veto checks were deployed. The per-label malicious/typosquat numbers reflect the legacy algorithm. A full v2 re-run will be published in the next release.
 
 ---
 
@@ -224,6 +337,10 @@ A package's reputation is not determined by popularity alone. revera combines ma
 - [x] Direct and transitive project auditing
 - [x] Publisher trust incident checks
 - [x] Typosquat Levenshtein warnings
+- [x] **Bayesian Beta posterior scoring (v2)**
+- [x] **Transitive DAG risk propagation (v2)**
+- [x] **Multi-source vulnerability aggregation (OSV + GitHub + npm)**
+- [x] **GitHub-readable benchmark reports (`BENCHMARK.md`)**
 - [ ] Multi-package comparison commands
 - [ ] Official GitHub Action for CI checks
 - [ ] Official VS Code extension
@@ -241,25 +358,16 @@ revera config set githubToken ghp_YOUR_TOKEN
 ```
 
 #### What happens if I am offline?
-revera will fall back to using cache files. You can explicitly run commands in offline mode with the `--offline` flag.
+Revera falls back to using cache files. You can explicitly run commands in offline mode with the `--offline` flag. If a vulnerability source is unavailable, the Bayesian scorer widens the credible interval for that package rather than assuming clean.
 
 #### Does the add command modify my project?
-revera acts as a shell wrapper. It runs the real package installer after screening.
+Revera acts as a shell wrapper. It runs the real package installer after screening.
 
----
+#### What is a "tainted" package in the audit output?
+A package is marked tainted when one of its transitive dependencies triggered a veto or scored critically low. The audit output shows the worst subpath so you can trace the exact chain of dependencies that caused the flag.
 
-## Architecture & Structure
-
-```
-.github/          # CI configurations
-src/
-  ├── commands/   # Cli command handlers (check, why, add, audit, config, cache, update)
-  ├── engine/     # Reputation scoring modules (npm, github, OSV, trust, typosquatting)
-  ├── ui/         # Console view templates (reporter formatters, theme styles)
-  └── utils/      # Filesystem helpers (caching, configuration, package managers)
-tests/            # Unit testing suites
-docs/             # Architectural guidelines and extra documentation
-```
+#### How are vulnerabilities deduplicated across three databases?
+Each vulnerability is identified by its CVE ID, GHSA ID, or npm advisory ID. When the same vulnerability appears in multiple sources, it is merged into one canonical entry. OSV data takes priority for prose fields (summary, details); the highest severity rating and most complete patched-version range across all sources are preserved.
 
 ---
 
@@ -271,10 +379,10 @@ Please review the [Contributing Guide](CONTRIBUTING.md) to get started with setu
 
 ## Disclaimer
 
-revera provides a reputation score based on observable project signals and historical data. It is intended to assist engineering decisions and should not be treated as a definitive security audit.
+Revera provides a reputation score based on observable project signals and historical data. It is intended to assist engineering decisions and should not be treated as a definitive security audit.
 
 ---
 
 ## License
 
-revera is distributed under the [MIT License](LICENSE).
+Revera is distributed under the [MIT License](LICENSE).

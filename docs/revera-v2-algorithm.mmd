@@ -1,0 +1,93 @@
+flowchart TD
+    Start(["Input: package name,<br/>or project manifest for a full scan"]) --> R1
+
+    subgraph S1["Stage 1 - Dependency graph resolution"]
+        R1["Parse package-lock / node_modules"]
+        R2["Build DAG: depth, isProd,<br/>dependents fan-in, isDirect"]
+        R3["Single-package mode = DAG of size 1<br/>(same algorithm, degenerate case)"]
+        R1 --> R2
+        R2 --> R3
+    end
+
+    R3 --> NodeLoop["For every node in the DAG,<br/>run the pipeline below independently"]
+    NodeLoop --> F1
+    NodeLoop --> F2
+    NodeLoop --> F3
+    NodeLoop --> F4
+    NodeLoop --> F5
+
+    subgraph S2["Stage 2 - Per-node evidence pipeline"]
+        subgraph S2a["2a - Multi-source collection, parallel"]
+            F1["npm registry + download stats"]
+            F2["GitHub repo activity"]
+            F3["Vuln feeds: OSV + GHSA,<br/>tri-state: clean / vulnerable / unknown"]
+            F4["Publisher trust registry,<br/>severity: critical / high / moderate"]
+            F5["Typosquat edit distance<br/>vs top-N package names"]
+        end
+
+        F1 --> Veto
+        F2 --> Veto
+        F3 --> Veto
+        F4 --> Veto
+        F5 --> Veto
+
+        Veto{"Critical trust incident, or<br/>typo distance <= 1, or<br/>unpatched critical CVE?"}
+
+        Veto -->|"yes"| VetoPath["intrinsic_risk = 0.97<br/>tainted = true<br/>evidence = incident / typo / CVE record"]
+        Veto -->|"no"| Prior["Select informative prior by archetype:<br/>framework, CLI, types-only, utility"]
+
+        subgraph S2b["2b - Bayesian belief update per category"]
+            BC["8 categories: maintenance, stability,<br/>security, quality, ecosystem,<br/>docs, DX, publisher trust"]
+            BS["Each signal becomes a likelihood:<br/>Bernoulli, log-scaled, or categorical"]
+            BW["Context weight w =<br/>f(downloads, age, ecosystem size)"]
+            BU["Update Beta(a, b):<br/>a += w times strength,<br/>b += w times (1 - strength)"]
+            BUnk["Unverifiable signal, e.g. vuln API<br/>timeout, widens the interval<br/>instead of assuming clean"]
+            BP["Category posterior:<br/>mean = a / (a + b),<br/>confidence = 1 / variance"]
+            BC --> BS
+            BS --> BW
+            BW --> BU
+            BU --> BP
+            BUnk --> BU
+        end
+
+        Prior --> BC
+        BP --> Agg["Confidence-weighted aggregation:<br/>weight_c is proportional to<br/>base_weight_c times confidence_c"]
+        Agg --> CI["mu_intrinsic = weighted mean of categories,<br/>credible interval from weighted variance"]
+        CI --> NormalPath["intrinsic_risk = 1 - mu_intrinsic<br/>tainted = false"]
+    end
+
+    VetoPath --> NodeRisk["node.intrinsic_risk ready:<br/>value, interval, tainted flag, evidence"]
+    NormalPath --> NodeRisk
+
+    NodeRisk --> P1
+
+    subgraph S3["Stage 3 - Bottom-up risk propagation over the DAG"]
+        P1["Topological order: leaves to root"]
+        P2["combined_child = 1 - product of<br/>(1 - child.effective_risk) across children"]
+        P3["attenuated = combined_child times<br/>decay raised to depth_delta"]
+        P4["node.effective_risk =<br/>1 - (1 - intrinsic_risk) times (1 - attenuated)"]
+        P5{"Tainted at self, or<br/>inherited from any child?"}
+        P6["Floor effective_risk at the incident's<br/>penalty; mark the tainted subpath"]
+        P7["blast_radius =<br/>effective_risk times dependents_count"]
+        P1 --> P2
+        P2 --> P3
+        P3 --> P4
+        P4 --> P5
+        P5 -->|"yes"| P6
+        P6 --> P7
+        P5 -->|"no"| P7
+    end
+
+    P7 --> O1
+
+    subgraph S4["Stage 4 - Report synthesis"]
+        O1["overallScore = 100 times (1 - effective_risk)"]
+        O2["Recommendation from score thresholds,<br/>forced override if tainted anywhere"]
+        O3["Evidence trail: top contributing<br/>signals, credible interval"]
+        O4["Graph context: intrinsic vs inherited risk,<br/>worst subpath, blast radius"]
+        O1 --> O2
+        O2 --> O3
+        O3 --> O4
+    end
+
+    O4 --> Done(["Final trust report,<br/>per package in the DAG"])
