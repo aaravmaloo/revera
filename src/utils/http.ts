@@ -12,9 +12,9 @@ export async function requestWithRetry<T = any>(
     const status = err.response?.status;
     const isRateLimit = status === 429 || (status === 403 && err.response?.headers?.['x-ratelimit-remaining'] === '0');
     const isServerError = status >= 500 && status < 600;
-    const isNetworkError = !status || err.code === 'ECONNABORTED' || err.code === 'ENOTFOUND' || err.code === 'ECONNRESET';
+    const isTransientNetwork = err.code === 'ECONNRESET' || err.code === 'EPIPE';
 
-    if ((isRateLimit || isServerError || isNetworkError) && retries > 0) {
+    if ((isRateLimit || isServerError || isTransientNetwork) && retries > 0) {
       // If server specifies a Retry-After header, honor it (in seconds)
       const retryAfterHeader = err.response?.headers?.['retry-after'];
       const waitTime = isRateLimit && retryAfterHeader

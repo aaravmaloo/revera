@@ -387,10 +387,10 @@ export async function checkVulnerabilities(
     failedSources.push('osv');
   }
 
-  // Only query GitHub and npm if OSV query failed, or if it found some vulnerabilities
+  // Only query GitHub and npm if OSV found some vulnerabilities
   // (to enrich/verify them with better CVSS scores / patched versions metadata).
-  if (osvFailed || osvVulns.length > 0) {
-    logger.info(`OSV found vulnerabilities or failed; querying GitHub and npm advisories for ${packageName}@${version}`);
+  if (osvVulns.length > 0) {
+    logger.info(`OSV found vulnerabilities; querying GitHub and npm advisories for ${packageName}@${version}`);
     const [ghResult, npmResult] = await Promise.allSettled([
       queryGitHubAdvisory(packageName, version),
       queryNpmAdvisory(packageName, version),
