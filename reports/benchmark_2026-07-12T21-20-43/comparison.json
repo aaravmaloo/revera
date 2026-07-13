@@ -1,0 +1,514 @@
+{
+  "current_run_id": "2026-07-12T21-20-43",
+  "previous_run_id": "2026-07-06T15-00-30",
+  "previous_run_dir": "/home/aaravmaloo/revera_benchmarks/2026-07-06T15-00-30",
+  "accuracy_delta": 0.007817898356499264,
+  "false_positives_delta": -56,
+  "false_negatives_delta": -2,
+  "correct_delta": -45,
+  "errors_delta": 3190,
+  "top_regressions": [
+    {
+      "name": "axios",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 99,
+      "curr_score": 3,
+      "score_delta": -96,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "aws-cdk",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 99,
+      "curr_score": 3,
+      "score_delta": -96,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "@thi.ng/api",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 95,
+      "curr_score": 3,
+      "score_delta": -92,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "@pixi/colord",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 94,
+      "curr_score": 3,
+      "score_delta": -91,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "lodash",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 90,
+      "curr_score": 0,
+      "score_delta": -90,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "@bugsnag/cuid",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 93,
+      "curr_score": 3,
+      "score_delta": -90,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "@tanstack/react-router",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 93,
+      "curr_score": 3,
+      "score_delta": -90,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "@aws-amplify/api",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 93,
+      "curr_score": 3,
+      "score_delta": -90,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "@rsbuild/core",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 91,
+      "curr_score": 3,
+      "score_delta": -88,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "express",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 92,
+      "curr_score": 5,
+      "score_delta": -87,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "@graphql-eslint/eslint-plugin",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 89,
+      "curr_score": 3,
+      "score_delta": -86,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "@docuseal/api",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 89,
+      "curr_score": 3,
+      "score_delta": -86,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "@nosana/api",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 89,
+      "curr_score": 3,
+      "score_delta": -86,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "@expo/server",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 89,
+      "curr_score": 3,
+      "score_delta": -86,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "@types/node-fetch",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 88,
+      "curr_score": 3,
+      "score_delta": -85,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "@types/node-cron",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 88,
+      "curr_score": 3,
+      "score_delta": -85,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "@types/node-ipc",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 88,
+      "curr_score": 3,
+      "score_delta": -85,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "@types/ps-node",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 88,
+      "curr_score": 3,
+      "score_delta": -85,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "@types/react-router",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 88,
+      "curr_score": 3,
+      "score_delta": -85,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "@eslint/js",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 88,
+      "curr_score": 3,
+      "score_delta": -85,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "@html-eslint/eslint-plugin",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 88,
+      "curr_score": 3,
+      "score_delta": -85,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "@duffel/api",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 88,
+      "curr_score": 3,
+      "score_delta": -85,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "@bull-board/api",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 87,
+      "curr_score": 3,
+      "score_delta": -84,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "@gitbeaker/rest",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 87,
+      "curr_score": 3,
+      "score_delta": -84,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "@tursodatabase/api",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 87,
+      "curr_score": 3,
+      "score_delta": -84,
+      "prev_correct": true,
+      "curr_correct": false
+    }
+  ],
+  "top_improvements": [
+    {
+      "name": "eslint-config-react-app",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 59,
+      "curr_score": 88,
+      "score_delta": 29,
+      "prev_correct": false,
+      "curr_correct": true
+    },
+    {
+      "name": "@babel/helper-builder-binary-assignment-operator-visitor",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 59,
+      "curr_score": 88,
+      "score_delta": 29,
+      "prev_correct": false,
+      "curr_correct": true
+    },
+    {
+      "name": "@babel/helper-define-map",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 59,
+      "curr_score": 87,
+      "score_delta": 28,
+      "prev_correct": false,
+      "curr_correct": true
+    },
+    {
+      "name": "service",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 54,
+      "curr_score": 81,
+      "score_delta": 27,
+      "prev_correct": false,
+      "curr_correct": true
+    },
+    {
+      "name": "@mocks-server/plugin-inquirer-cli",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 57,
+      "curr_score": 84,
+      "score_delta": 27,
+      "prev_correct": false,
+      "curr_correct": true
+    },
+    {
+      "name": "u2f-api-polyfill",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 57,
+      "curr_score": 84,
+      "score_delta": 27,
+      "prev_correct": false,
+      "curr_correct": true
+    },
+    {
+      "name": "@apollographql/graphql-language-service-types",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 58,
+      "curr_score": 85,
+      "score_delta": 27,
+      "prev_correct": false,
+      "curr_correct": true
+    },
+    {
+      "name": "eslint-config-node-important-stuff",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 57,
+      "curr_score": 83,
+      "score_delta": 26,
+      "prev_correct": false,
+      "curr_correct": true
+    },
+    {
+      "name": "node-utils",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 52,
+      "curr_score": 78,
+      "score_delta": 26,
+      "prev_correct": false,
+      "curr_correct": true
+    },
+    {
+      "name": "helper",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 54,
+      "curr_score": 80,
+      "score_delta": 26,
+      "prev_correct": false,
+      "curr_correct": true
+    },
+    {
+      "name": "cva",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 54,
+      "curr_score": 79,
+      "score_delta": 25,
+      "prev_correct": false,
+      "curr_correct": true
+    },
+    {
+      "name": "node-red-contrib-match",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 58,
+      "curr_score": 83,
+      "score_delta": 25,
+      "prev_correct": false,
+      "curr_correct": true
+    },
+    {
+      "name": "dotjs",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 48,
+      "curr_score": 73,
+      "score_delta": 25,
+      "prev_correct": false,
+      "curr_correct": true
+    },
+    {
+      "name": "interop-require",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 57,
+      "curr_score": 82,
+      "score_delta": 25,
+      "prev_correct": false,
+      "curr_correct": true
+    },
+    {
+      "name": "init",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 54,
+      "curr_score": 79,
+      "score_delta": 25,
+      "prev_correct": false,
+      "curr_correct": true
+    },
+    {
+      "name": "n8n-nodes-scrapeninja",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 51,
+      "curr_score": 76,
+      "score_delta": 25,
+      "prev_correct": false,
+      "curr_correct": true
+    },
+    {
+      "name": "kafka",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 54,
+      "curr_score": 79,
+      "score_delta": 25,
+      "prev_correct": false,
+      "curr_correct": true
+    },
+    {
+      "name": "node-red-contrib-trello",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 54,
+      "curr_score": 79,
+      "score_delta": 25,
+      "prev_correct": false,
+      "curr_correct": true
+    },
+    {
+      "name": "@brrinta/authorizenet-ts",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 56,
+      "curr_score": 81,
+      "score_delta": 25,
+      "prev_correct": false,
+      "curr_correct": true
+    },
+    {
+      "name": "xmlreader",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 54,
+      "curr_score": 79,
+      "score_delta": 25,
+      "prev_correct": false,
+      "curr_correct": true
+    },
+    {
+      "name": "repl-utils",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 55,
+      "curr_score": 80,
+      "score_delta": 25,
+      "prev_correct": false,
+      "curr_correct": true
+    },
+    {
+      "name": "ansi-font",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 54,
+      "curr_score": 79,
+      "score_delta": 25,
+      "prev_correct": false,
+      "curr_correct": true
+    },
+    {
+      "name": "fs-tool",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 54,
+      "curr_score": 79,
+      "score_delta": 25,
+      "prev_correct": false,
+      "curr_correct": true
+    },
+    {
+      "name": "node-fs",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 56,
+      "curr_score": 80,
+      "score_delta": 24,
+      "prev_correct": false,
+      "curr_correct": true
+    },
+    {
+      "name": "@flexdash/node-red-flexdash-plugin",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 56,
+      "curr_score": 80,
+      "score_delta": 24,
+      "prev_correct": false,
+      "curr_correct": true
+    }
+  ]
+}
