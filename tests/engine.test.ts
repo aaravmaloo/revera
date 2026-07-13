@@ -4,7 +4,7 @@ import { buildDAG, getTopologicalOrder, propagateRisk, DAGNode } from '../src/en
 import { NpmRegistryData, NpmDownloadsData } from '../src/engine/npm.js';
 import { GitHubRepoData } from '../src/engine/github.js';
 import { TrustResult } from '../src/engine/trust.js';
-import { TyposquatResult } from '../src/engine/typosquat.js';
+import { TyposquatResult, checkTyposquatting } from '../src/engine/typosquat.js';
 
 describe('Scoring Engine — Bayesian posteriors & archetype priors', () => {
   const mockNpmData: NpmRegistryData = {
@@ -141,5 +141,29 @@ describe('DAG Risk Propagation — bottom-up taint & blast radius', () => {
     expect(parent.report.overallScore).toBeLessThanOrEqual(20);
     expect(parent.report.recommendation).toBe('Not Recommended');
     expect(parent.worstSubpath).toEqual(['parent-pkg', 'child-pkg']);
+  });
+});
+
+describe('Typosquatting Detection', () => {
+  it('flags close typos (distance 1 or 2) on low-adoption packages', () => {
+    const res = checkTyposquatting('lodahs', 500);
+    expect(res.isSuspicious).toBe(true);
+    expect(res.similarTo).toBe('lodash');
+    expect(res.distance).toBe(2);
+  });
+
+  it('does not flag exact matches of popular packages', () => {
+    const res = checkTyposquatting('lodash', 500);
+    expect(res.isSuspicious).toBe(false);
+  });
+
+  it('does not flag scoped forks of popular packages with distance 0', () => {
+    const res = checkTyposquatting('@myorg/lodash', 500);
+    expect(res.isSuspicious).toBe(false);
+  });
+
+  it('does not flag packages with high adoption', () => {
+    const res = checkTyposquatting('lodahs', 15000);
+    expect(res.isSuspicious).toBe(false);
   });
 });
