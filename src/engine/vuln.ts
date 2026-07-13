@@ -14,6 +14,7 @@
  */
 
 import axios from 'axios';
+import semver from 'semver';
 import * as cache from '../utils/cache.js';
 import * as logger from '../utils/logger.js';
 import { loadConfig } from '../utils/config.js';
@@ -157,10 +158,26 @@ function advisoryAffectsVersion(advisory: any, packageName: string, version: str
   return vulnPackages.some((vp) => {
     if (vp.package?.ecosystem !== 'npm') return false;
     if (vp.package?.name !== packageName) return false;
-    // If no version range info, assume it affects everything
-    if (!vp.vulnerable_version_range) return true;
-    // Trust the database — include if version range is listed
-    // (full semver range evaluation is heavy; the OSV source already does it precisely)
+
+    // If the current version satisfies the patched range, the vuln is fixed — skip it.
+    if (vp.patched_versions) {
+      try {
+        if (semver.satisfies(version, vp.patched_versions, { includePrerelease: true })) return false;
+      } catch {
+        // unparseable range — fall through to vulnerable_version_range check
+      }
+    }
+
+    // If a vulnerable range is specified, check whether our version is inside it.
+    if (vp.vulnerable_version_range) {
+      try {
+        return semver.satisfies(version, vp.vulnerable_version_range, { includePrerelease: true });
+      } catch {
+        return true; // unparseable range — assume affected
+      }
+    }
+
+    // No range info at all — conservatively assume it affects the current version.
     return true;
   });
 }
@@ -314,7 +331,10 @@ export async function checkVulnerabilities(
   offline = false,
 ): Promise<VulnResult> {
   const config = loadConfig();
-  const cacheKey = `vulns_v2_${version}`;
+  // Cache key includes version so different versions get independent entries.
+  // Use a versioned prefix (v3) so stale v2 cache entries (which lacked proper
+  // version-range filtering) are automatically invalidated on first run.
+  const cacheKey = `vulns_v3_${version}`;
   const cached = cache.get<Vulnerability[]>(packageName, cacheKey, config.cacheTtlMs, offline);
 
   if (cached) {

@@ -150,20 +150,19 @@ export function detectArchetype(packageName: string, npmData: NpmRegistryData, l
 }
 
 function isCriticalCVE(vuln: Vulnerability): boolean {
-  const v = vuln as any;
-  if (v.severity) {
-    for (const sev of v.severity) {
-      if (sev.score) {
-        const score = parseFloat(sev.score);
-        if (!isNaN(score) && score >= 9.0) return true;
-      }
-    }
-  }
-  const dbSpecific = v.database_specific;
-  if (dbSpecific) {
-    if (dbSpecific.severity === 'CRITICAL' || dbSpecific.cvss?.score >= 9.0) return true;
-  }
-  const text = `${v.summary || ''} ${v.details || ''}`.toLowerCase();
+  // If the advisory already has a known patch, the latest version is not
+  // affected — don't veto the package over a historical fixed vulnerability.
+  if (vuln.patchedVersions) return false;
+
+  // Check structured CVSS score on the mapped object
+  if (vuln.cvssScore !== undefined && vuln.cvssScore >= 9.0) return true;
+
+  // Severity enum check
+  if (vuln.severity === 'CRITICAL') return true;
+
+  // Text-match as a last resort — only for clearly unpatched vulns
+  // (patchedVersions guard above already handled the patched case)
+  const text = `${vuln.summary || ''} ${vuln.details || ''}`.toLowerCase();
   if (
     text.includes('critical') &&
     (text.includes('remote code execution') || text.includes('rce') || text.includes('prototype pollution'))
