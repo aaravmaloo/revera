@@ -363,35 +363,54 @@ export async function checkVulnerabilities(
     return { status: 'unknown', vulnerabilities: [], sources: [], failedSources: ['osv', 'github', 'npm'] };
   }
 
-  logger.info(`Checking vulnerabilities (OSV + GitHub Advisory + npm) for ${packageName}@${version}`);
+  logger.info(`Checking vulnerabilities (OSV) for ${packageName}@${version}`);
 
-  // Run all three queries in parallel — individual failures don't abort the rest
-  const [osvResult, ghResult, npmResult] = await Promise.allSettled([
-    queryOSV(packageName, version),
-    queryGitHubAdvisory(packageName, version),
-    queryNpmAdvisory(packageName, version),
-  ]);
+  let osvVulns: Vulnerability[] = [];
+  let osvFailed = false;
+
+  try {
+    osvVulns = await queryOSV(packageName, version);
+  } catch (err: any) {
+    osvFailed = true;
+    logger.warn(`[OSV] vuln check failed for ${packageName}@${version}: ${err.message}`);
+  }
 
   const succeededSources: ('osv' | 'github' | 'npm')[] = [];
   const failedSources: ('osv' | 'github' | 'npm')[] = [];
   const allVulns: Vulnerability[] = [];
 
-  function handle(
-    result: PromiseSettledResult<Vulnerability[]>,
-    name: 'osv' | 'github' | 'npm',
-  ) {
-    if (result.status === 'fulfilled') {
-      succeededSources.push(name);
-      allVulns.push(...result.value);
-    } else {
-      failedSources.push(name);
-      logger.warn(`[${name.toUpperCase()}] vuln check failed for ${packageName}@${version}: ${result.reason?.message}`);
-    }
+  if (!osvFailed) {
+    succeededSources.push('osv');
+    allVulns.push(...osvVulns);
+  } else {
+    failedSources.push('osv');
   }
 
-  handle(osvResult, 'osv');
-  handle(ghResult, 'github');
-  handle(npmResult, 'npm');
+  // Only query GitHub and npm if OSV query failed, or if it found some vulnerabilities
+  // (to enrich/verify them with better CVSS scores / patched versions metadata).
+  if (osvFailed || osvVulns.length > 0) {
+    logger.info(`OSV found vulnerabilities or failed; querying GitHub and npm advisories for ${packageName}@${version}`);
+    const [ghResult, npmResult] = await Promise.allSettled([
+      queryGitHubAdvisory(packageName, version),
+      queryNpmAdvisory(packageName, version),
+    ]);
+
+    if (ghResult.status === 'fulfilled') {
+      succeededSources.push('github');
+      allVulns.push(...ghResult.value);
+    } else {
+      failedSources.push('github');
+      logger.warn(`[GITHUB] vuln check failed for ${packageName}@${version}: ${ghResult.reason?.message}`);
+    }
+
+    if (npmResult.status === 'fulfilled') {
+      succeededSources.push('npm');
+      allVulns.push(...npmResult.value);
+    } else {
+      failedSources.push('npm');
+      logger.warn(`[NPM] vuln check failed for ${packageName}@${version}: ${npmResult.reason?.message}`);
+    }
+  }
 
   const merged = deduplicateVulns(allVulns);
 
