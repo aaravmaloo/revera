@@ -84,6 +84,16 @@ if [[ "$NODE_MAJOR" -lt 22 ]]; then
   die "Node.js >=22 required (found $(node --version))"
 fi
 
+# ── GitHub token check ────────────────────────────────────────────────────────
+if [[ -z "${GITHUB_TOKEN:-}" ]]; then
+  warn "GITHUB_TOKEN is not set."
+  warn "Without it the GitHub API is limited to 60 requests/hour (unauthenticated)."
+  warn "On a 17k-package run this will cause thousands of vuln-check timeouts."
+  warn "Set BENCHMARK_GITHUB_TOKEN in repo Secrets and it will be injected automatically."
+else
+  ok "GITHUB_TOKEN is set — GitHub API rate limit: 5,000 req/hr (authenticated)"
+fi
+
 # ── Check dataset ─────────────────────────────────────────────────────────────
 if [[ ! -f "$DATASET" ]]; then
   warn "Dataset not found: $DATASET"

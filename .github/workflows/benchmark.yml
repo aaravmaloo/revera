@@ -12,6 +12,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: read
 
 jobs:
   benchmark:
@@ -30,6 +31,12 @@ jobs:
           npm install
           
       - name: Run Benchmark
+        env:
+          # Passed through to benchmark.sh → node runner → revera's github.ts
+          # so GitHub API calls use the authenticated rate limit (5,000/hr)
+          # instead of the unauthenticated limit (60/hr).
+          # Set BENCHMARK_GITHUB_TOKEN in repo Settings → Secrets → Actions.
+          GITHUB_TOKEN: ${{ secrets.BENCHMARK_GITHUB_TOKEN }}
         run: |
           # Use a persistent dataset directory on the server to avoid re-fetching 34k packages on every commit
           PERSISTENT_DATASET_DIR="$HOME/revera_datasets"
