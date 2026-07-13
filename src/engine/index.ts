@@ -19,7 +19,7 @@ export async function analyzePackage(
   try {
     logger.info(`Starting analysis for package "${packageName}"`, { offline });
 
-    // Step 1: Fetch NPM Registry metadata
+    // ── Wave 1: Registry metadata (must come first to get GitHub URL and version) ──
     if (spinner) spinner.text = `Fetching registry metadata for ${packageName}...`;
     const registryData = await fetchRegistryData(packageName, offline);
 
@@ -28,7 +28,6 @@ export async function analyzePackage(
       throw new Error(`Package "${packageName}" contains no published versions.`);
     }
 
-    // Check if package has external TypeScript declarations (DefinitelyTyped)
     const manifest = registryData.versions[latestVersion] || {};
     const hasNativeTypes =
       'types' in manifest ||
@@ -37,47 +36,43 @@ export async function analyzePackage(
       manifest.exports?.['.']?.types ||
       manifest.exports?.types;
 
-    let externalTypes = false;
-    if (!hasNativeTypes) {
-      if (spinner) spinner.text = `Checking TypeScript typing support for ${packageName}...`;
-      externalTypes = await hasDefinitelyTyped(packageName, offline);
-    }
-
-    // Step 2: Fetch weekly download counts
-    if (spinner) spinner.text = `Fetching download stats for ${packageName}...`;
-    const downloadStats = await fetchDownloadStats(packageName, offline);
-
-    // Step 3: Fetch GitHub repository stats if available
-    let githubData = null;
     const githubInfo = parseGitHubUrl(registryData.repository?.url);
-    if (githubInfo) {
-      if (spinner) spinner.text = `Querying GitHub repository ${githubInfo.owner}/${githubInfo.repo}...`;
-      githubData = await fetchGitHubRepoData(githubInfo.owner, githubInfo.repo, packageName, offline);
 
-      // Step 3.5: Fetch README from GitHub if missing in Registry
-      if ((!registryData.readme || registryData.readme.trim() === '') && !offline) {
-        if (spinner) spinner.text = `Fetching README from GitHub repo...`;
-        const githubReadme = await fetchGitHubReadme(githubInfo.owner, githubInfo.repo, packageName, offline);
-        if (githubReadme) {
-          registryData.readme = githubReadme;
-        }
-      }
-    } else {
-      logger.info(`No GitHub repository found in manifest for ${packageName}`);
-    }
+    // ── Wave 2: All independent fetches run in parallel ────────────────────────
+    // downloads + GitHub repo + vuln check + types check all fire concurrently.
+    // This collapses 5 sequential round trips (~5 × 300ms = 1.5s) into one wave.
+    if (spinner) spinner.text = `Fetching stats, GitHub data, and vulnerabilities for ${packageName}...`;
 
-    // Step 4: Check vulnerabilities across OSV, GitHub Advisory DB, and npm registry
-    if (spinner) spinner.text = `Checking vulnerabilities (OSV + GitHub + npm) for ${packageName}@${latestVersion}...`;
-    const vulnerabilities = await checkVulnerabilities(packageName, latestVersion, offline);
+    const [downloadStats, githubData, vulnerabilities, externalTypes] = await Promise.all([
+      fetchDownloadStats(packageName, offline),
+
+      githubInfo
+        ? fetchGitHubRepoData(githubInfo.owner, githubInfo.repo, packageName, offline)
+        : Promise.resolve(null),
+
+      checkVulnerabilities(packageName, latestVersion, offline),
+
+      hasNativeTypes ? Promise.resolve(false) : hasDefinitelyTyped(packageName, offline),
+    ]);
+
     if (vulnerabilities.failedSources.length > 0) {
       logger.warn(`Vuln sources unavailable for ${packageName}: ${vulnerabilities.failedSources.join(', ')}`);
     }
 
-    // Step 5: Publisher trust and typosquat checks (synchronous, no network)
+    // README fetch: only needed in interactive mode (not benchmark silent mode)
+    // and only when the npm registry didn't include one.
+    if (!silent && githubInfo && githubData && (!registryData.readme || registryData.readme.trim() === '') && !offline) {
+      const githubReadme = await fetchGitHubReadme(githubInfo.owner, githubInfo.repo, packageName, offline);
+      if (githubReadme) {
+        registryData.readme = githubReadme;
+      }
+    }
+
+    // ── Wave 3: Synchronous checks (zero network cost) ─────────────────────────
     const trustResult = checkPublisherTrust(packageName);
     const typosquatResult = checkTyposquatting(packageName, downloadStats.downloads || 0);
 
-    // Step 6: Score package and compile report
+    // ── Wave 4: Score and compile report ───────────────────────────────────────
     if (spinner) spinner.text = 'Computing package confidence report...';
     const report = generateReport(
       registryData,
@@ -89,16 +84,12 @@ export async function analyzePackage(
       externalTypes,
     );
 
-    if (spinner) {
-      spinner.succeed(`Successfully analyzed "${packageName}"`);
-    }
+    if (spinner) spinner.succeed(`Successfully analyzed "${packageName}"`);
 
     logger.info(`Completed analysis for "${packageName}" with score ${report.overallScore}`);
     return report;
   } catch (err: any) {
-    if (spinner) {
-      spinner.fail(`Failed analyzing "${packageName}"`);
-    }
+    if (spinner) spinner.fail(`Failed analyzing "${packageName}"`);
     logger.error(`Error analyzing package "${packageName}": ${err.message}`, { stack: err.stack });
     throw err;
   }
