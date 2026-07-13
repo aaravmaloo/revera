@@ -18,6 +18,7 @@ import semver from 'semver';
 import * as cache from '../utils/cache.js';
 import * as logger from '../utils/logger.js';
 import { loadConfig } from '../utils/config.js';
+import { retrieveToken } from '../utils/keyring.js';
 
 // ─── Public types ──────────────────────────────────────────────────────────
 
@@ -118,7 +119,23 @@ function extractOSVPatched(v: any, packageName: string): string | undefined {
 // ─── Source 2: GitHub Advisory Database ──────────────────────────────────
 
 async function queryGitHubAdvisory(packageName: string, version: string): Promise<Vulnerability[]> {
-  // Public REST endpoint — no token needed for unauthenticated read of global advisories
+  const config = loadConfig();
+  const headers: Record<string, string> = {
+    Accept: 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+    'User-Agent': UA,
+  };
+
+  const keyringToken = await retrieveToken();
+  if (keyringToken) {
+    headers['Authorization'] = `token ${keyringToken}`;
+  } else if (config.githubToken) {
+    headers['Authorization'] = `token ${config.githubToken}`;
+  } else if (process.env.GITHUB_TOKEN) {
+    headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`;
+  }
+
+  // Public REST endpoint
   // GET /advisories?ecosystem=npm&affects={package}&per_page=100
   const response = await axios.get('https://api.github.com/advisories', {
     params: {
@@ -127,11 +144,7 @@ async function queryGitHubAdvisory(packageName: string, version: string): Promis
       per_page: 100,
     },
     timeout: TIMEOUT_MS,
-    headers: {
-      Accept: 'application/vnd.github+json',
-      'X-GitHub-Api-Version': '2022-11-28',
-      'User-Agent': UA,
-    },
+    headers,
   });
 
   const advisories: any[] = response.data ?? [];

@@ -278,7 +278,7 @@ export function checkTyposquatting(packageName: string, weeklyDownloads: number)
     }
   }
 
-  if (minDistance <= 2 && closestMatch !== null) {
+  if (minDistance > 0 && minDistance <= 2 && closestMatch !== null) {
     return {
       isSuspicious: true,
       similarTo: closestMatch,
