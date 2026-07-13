@@ -19,6 +19,7 @@ import * as cache from '../utils/cache.js';
 import * as logger from '../utils/logger.js';
 import { loadConfig } from '../utils/config.js';
 import { retrieveToken } from '../utils/keyring.js';
+import { requestWithRetry } from '../utils/http.js';
 
 // ─── Public types ──────────────────────────────────────────────────────────
 
@@ -52,17 +53,16 @@ const UA = 'revera-cli/2.0.0';
 // ─── Source 1: OSV ────────────────────────────────────────────────────────
 
 async function queryOSV(packageName: string, version: string): Promise<Vulnerability[]> {
-  const response = await axios.post(
-    'https://api.osv.dev/v1/query',
-    {
+  const response = await requestWithRetry({
+    url: 'https://api.osv.dev/v1/query',
+    method: 'POST',
+    data: {
       version,
       package: { name: packageName, ecosystem: 'npm' },
     },
-    {
-      timeout: TIMEOUT_MS,
-      headers: { 'Content-Type': 'application/json', 'User-Agent': UA },
-    },
-  );
+    timeout: TIMEOUT_MS,
+    headers: { 'Content-Type': 'application/json', 'User-Agent': UA },
+  });
 
   const raw: any[] = response.data?.vulns ?? [];
   return raw.map((v) => ({
@@ -137,7 +137,9 @@ async function queryGitHubAdvisory(packageName: string, version: string): Promis
 
   // Public REST endpoint
   // GET /advisories?ecosystem=npm&affects={package}&per_page=100
-  const response = await axios.get('https://api.github.com/advisories', {
+  const response = await requestWithRetry({
+    url: 'https://api.github.com/advisories',
+    method: 'GET',
     params: {
       ecosystem: 'npm',
       affects: packageName,
@@ -218,17 +220,16 @@ function extractGHPatched(advisory: any, packageName: string): string | undefine
 async function queryNpmAdvisory(packageName: string, version: string): Promise<Vulnerability[]> {
   // POST https://registry.npmjs.org/-/npm/v1/security/advisories/bulk
   // Body: { "<name>": ["<version>", ...] }
-  const response = await axios.post(
-    'https://registry.npmjs.org/-/npm/v1/security/advisories/bulk',
-    { [packageName]: [version] },
-    {
-      timeout: TIMEOUT_MS,
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': UA,
-      },
+  const response = await requestWithRetry({
+    url: 'https://registry.npmjs.org/-/npm/v1/security/advisories/bulk',
+    method: 'POST',
+    data: { [packageName]: [version] },
+    timeout: TIMEOUT_MS,
+    headers: {
+      'Content-Type': 'application/json',
+      'User-Agent': UA,
     },
-  );
+  });
 
   const data: Record<string, any[]> = response.data ?? {};
   const advisories: any[] = data[packageName] ?? [];

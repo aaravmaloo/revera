@@ -2,6 +2,7 @@ import axios from 'axios';
 import * as cache from '../utils/cache.js';
 import * as logger from '../utils/logger.js';
 import { loadConfig } from '../utils/config.js';
+import { requestWithRetry } from '../utils/http.js';
 
 export interface NpmRegistryData {
   name: string;
@@ -81,7 +82,9 @@ export async function fetchRegistryData(packageName: string, offline = false): P
   logger.info(`Fetching NPM registry data from ${url}`);
 
   try {
-    const response = await axios.get<NpmRegistryData>(url, {
+    const response = await requestWithRetry<NpmRegistryData>({
+      url,
+      method: 'GET',
       timeout: 10000,
       headers: {
         Accept: 'application/json',
@@ -116,7 +119,9 @@ export async function fetchDownloadStats(packageName: string, offline = false): 
   logger.info(`Fetching NPM download stats from ${url}`);
 
   try {
-    const response = await axios.get<NpmDownloadsData>(url, {
+    const response = await requestWithRetry<NpmDownloadsData>({
+      url,
+      method: 'GET',
       timeout: 10000,
       headers: {
         'User-Agent': 'revera-cli/1.0.0',
@@ -138,7 +143,11 @@ export async function hasDefinitelyTyped(packageName: string, offline = false): 
   const typesName = packageName.startsWith('@') ? packageName.slice(1).replace(/\//g, '__') : packageName;
   const url = `https://registry.npmjs.org/@types%2F${encodeURIComponent(typesName)}`;
   try {
-    const res = await axios.head(url, { timeout: 3000 });
+    const res = await requestWithRetry({
+      url,
+      method: 'HEAD',
+      timeout: 3000,
+    });
     return res.status === 200;
   } catch (err) {
     return false;

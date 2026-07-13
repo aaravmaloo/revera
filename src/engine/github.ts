@@ -3,6 +3,7 @@ import * as cache from '../utils/cache.js';
 import * as logger from '../utils/logger.js';
 import { loadConfig } from '../utils/config.js';
 import { retrieveToken } from '../utils/keyring.js';
+import { requestWithRetry } from '../utils/http.js';
 
 export interface GitHubRepoData {
   stars: number;
@@ -61,7 +62,9 @@ export async function fetchGitHubRepoData(
     logger.info(`Fetching GitHub repo data for ${owner}/${repo}`);
 
     // Fetch primary repo details
-    const repoRes = await axios.get(`https://api.github.com/repos/${owner}/${repo}`, {
+    const repoRes = await requestWithRetry({
+      url: `https://api.github.com/repos/${owner}/${repo}`,
+      method: 'GET',
       headers,
       timeout: 8000,
     });
@@ -71,7 +74,9 @@ export async function fetchGitHubRepoData(
     // Fetch contributors count using standard page-pagination trick
     let contributorsCount = 0;
     try {
-      const contribsRes = await axios.get(`https://api.github.com/repos/${owner}/${repo}/contributors`, {
+      const contribsRes = await requestWithRetry({
+        url: `https://api.github.com/repos/${owner}/${repo}/contributors`,
+        method: 'GET',
         params: { per_page: 1, anon: 'true' },
         headers,
         timeout: 8000,
@@ -88,7 +93,9 @@ export async function fetchGitHubRepoData(
       const ninetyDaysAgo = new Date();
       ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
 
-      const commitsRes = await axios.get(`https://api.github.com/repos/${owner}/${repo}/commits`, {
+      const commitsRes = await requestWithRetry({
+        url: `https://api.github.com/repos/${owner}/${repo}/commits`,
+        method: 'GET',
         params: { per_page: 100, since: ninetyDaysAgo.toISOString() },
         headers,
         timeout: 8000,
@@ -160,7 +167,9 @@ export async function fetchGitHubReadme(
 
   try {
     logger.info(`Fetching GitHub README for ${owner}/${repo}`);
-    const res = await axios.get(`https://api.github.com/repos/${owner}/${repo}/readme`, {
+    const res = await requestWithRetry({
+      url: `https://api.github.com/repos/${owner}/${repo}/readme`,
+      method: 'GET',
       headers,
       timeout: 8000,
     });
