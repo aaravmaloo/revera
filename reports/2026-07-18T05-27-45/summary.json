@@ -1,0 +1,61 @@
+{
+  "total": 18226,
+  "completed": 18226,
+  "skipped": 0,
+  "errors": 22,
+  "correct": 8000,
+  "incorrect": 208,
+  "accuracy": 0.9746588693957114,
+  "false_positives": 196,
+  "false_negatives": 12,
+  "by_label": {
+    "trusted": {
+      "total": 8193,
+      "correct": 7987,
+      "incorrect": 196,
+      "errors": 10,
+      "accuracy": 0.9748565848895399
+    },
+    "malicious": {
+      "total": 9,
+      "correct": 5,
+      "incorrect": 4,
+      "errors": 0,
+      "accuracy": 0.5555555555555556
+    },
+    "typosquat": {
+      "total": 20,
+      "correct": 7,
+      "incorrect": 4,
+      "errors": 9,
+      "accuracy": 0.35
+    },
+    "suspicious": {
+      "total": 5,
+      "correct": 1,
+      "incorrect": 4,
+      "errors": 0,
+      "accuracy": 0.2
+    },
+    "unknown": {
+      "total": 9999,
+      "correct": 0,
+      "incorrect": 0,
+      "errors": 3,
+      "accuracy": 0
+    }
+  },
+  "score_distribution": {
+    "0-20": 109,
+    "21-40": 98,
+    "41-60": 165,
+    "61-80": 13789,
+    "81-100": 4043
+  },
+  "avg_duration_ms": 3350.555195874026,
+  "p50_duration_ms": 842,
+  "p95_duration_ms": 8826,
+  "p99_duration_ms": 9137,
+  "throughput_per_second": 5.354764141824568,
+  "elapsed_ms": 3403698
+}

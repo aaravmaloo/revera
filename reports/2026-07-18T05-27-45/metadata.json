@@ -1,0 +1,13 @@
+{
+  "run_id": "2026-07-18T05-27-45",
+  "commit": "unknown",
+  "branch": "unknown",
+  "hostname": "devm",
+  "started_at": "2026-07-18T05:27:46.156Z",
+  "revera_version": "1.0.0",
+  "dataset_path": "C:\\Users\\Aarav Maloo\\Desktop\\revera\\benchmarker\\datasets\\npm.jsonl",
+  "dataset_lines": 18226,
+  "worker_count": 18,
+  "score_threshold": 60,
+  "finished_at": "2026-07-18T06:24:29.886Z"
+}

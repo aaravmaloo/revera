@@ -1,0 +1,144 @@
+{
+  "current_run_id": "2026-07-18T05-27-45",
+  "previous_run_id": "2026-07-18T04-43-50",
+  "previous_run_dir": "C:\\Users\\Aarav Maloo\\revera_benchmarks\\2026-07-18T04-43-50",
+  "accuracy_delta": 0.0001453040353387447,
+  "false_positives_delta": 115,
+  "false_negatives_delta": 0,
+  "correct_delta": 4444,
+  "errors_delta": -14555,
+  "top_regressions": [
+    {
+      "name": "insync",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 85,
+      "curr_score": 41,
+      "score_delta": -44,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "icomoon-build",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 79,
+      "curr_score": 37,
+      "score_delta": -42,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "node-red-contrib-wled2",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 82,
+      "curr_score": 40,
+      "score_delta": -42,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "passbook",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 79,
+      "curr_score": 37,
+      "score_delta": -42,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "babel-preset-node8",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 82,
+      "curr_score": 40,
+      "score_delta": -42,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "@ministryofjustice/fb-runner-node",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 78,
+      "curr_score": 37,
+      "score_delta": -41,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "node-tone",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 80,
+      "curr_score": 39,
+      "score_delta": -41,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "mod_status",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 80,
+      "curr_score": 40,
+      "score_delta": -40,
+      "prev_correct": true,
+      "curr_correct": false
+    },
+    {
+      "name": "ts-node-dev",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 77,
+      "curr_score": 45,
+      "score_delta": -32,
+      "prev_correct": true,
+      "curr_correct": false
+    }
+  ],
+  "top_improvements": [
+    {
+      "name": "csv-parser",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 3,
+      "curr_score": 89,
+      "score_delta": 86,
+      "prev_correct": false,
+      "curr_correct": true
+    },
+    {
+      "name": "@gitbook/api",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 3,
+      "curr_score": 86,
+      "score_delta": 83,
+      "prev_correct": false,
+      "curr_correct": true
+    },
+    {
+      "name": "@jsonjoy.com/fs-node",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 3,
+      "curr_score": 85,
+      "score_delta": 82,
+      "prev_correct": false,
+      "curr_correct": true
+    },
+    {
+      "name": "nest",
+      "registry": "npm",
+      "label": "trusted",
+      "prev_score": 3,
+      "curr_score": 82,
+      "score_delta": 79,
+      "prev_correct": false,
+      "curr_correct": true
+    }
+  ]
+}
